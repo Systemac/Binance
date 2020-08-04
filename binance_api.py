@@ -2,6 +2,7 @@ import time
 import hashlib
 import requests
 import hmac
+from datetime import datetime
 import config
 
 try:
@@ -16,9 +17,10 @@ class BinanceAPI:
     BASE_URL_V3 = "https://api.binance.com/api/v3"
     PUBLIC_URL = "https://www.binance.com/exchange/public/product"
 
-    def __init__(self, key, secret):
+    def __init__(self, key, secret, recv_windows):
         self.key = key
         self.secret = secret
+        self.recv_windows = recv_windows
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -34,9 +36,10 @@ class BinanceAPI:
         params = {"symbol": market, "limit": limit}
         return self._get_no_sign(path, params)
 
-    def get_klines(self, market, interval, startTime, endTime):
+    def get_klines(self, market, interval, delta=3600):
+        time = self._timestamp(self.get_server_time()['serverTime'])
         path = "%s/klines" % self.BASE_URL_V3
-        params = {"symbol": market, "interval": interval, "startTime": startTime, "endTime": endTime}
+        params = {"symbol": market, "interval": interval, "startTime": time - delta, "endTime": time}
         return self._get_no_sign(path, params)
 
     def get_ticker(self, market):
@@ -94,9 +97,9 @@ class BinanceAPI:
         params = self._order(market, quantity, "SELL")
         return self._post(path, params)
 
-    def query_order(self, market, orderId):
+    def query_order(self, market, order_id):
         path = "%s/order" % self.BASE_URL_V3
-        params = {"symbol": market, "orderId": orderId}
+        params = {"symbol": market, "orderId": order_id}
         return self._get(path, params)
 
     def cancel(self, market, order_id):
@@ -106,8 +109,9 @@ class BinanceAPI:
 
     def _get_no_sign(self, path, params={}):
         query = urlencode(params)
+        header = {"X-MBX-APIKEY": self.key}
         url = "%s?%s" % (path, query)
-        return requests.get(url, timeout=30, verify=True).json()
+        return requests.get(url, timeout=30, verify=True, headers=header).json()
 
     def _sign(self, params={}):
         data = params.copy()
@@ -122,7 +126,7 @@ class BinanceAPI:
         return data
 
     def _get(self, path, params={}):
-        params.update({"recvWindow": config.recv_window})
+        params.update({"recvWindow": self.recv_windows})
         query = urlencode(self._sign(params))
         url = "%s?%s" % (path, query)
         header = {"X-MBX-APIKEY": self.key}
@@ -130,12 +134,11 @@ class BinanceAPI:
                             timeout=30, verify=True).json()
 
     def _post(self, path, params={}):
-        params.update({"recvWindow": config.recv_window})
+        params.update({"recvWindow": self.recv_windows})
         query = urlencode(self._sign(params))
         url = "%s" % (path)
         header = {"X-MBX-APIKEY": self.key}
-        return requests.post(url, headers=header, data=query, \
-                             timeout=30, verify=True).json()
+        return requests.post(url, headers=header, data=query, timeout=30, verify=True).json()
 
     def _order(self, market, quantity, side, rate=None):
         params = {}
@@ -154,7 +157,7 @@ class BinanceAPI:
         return params
 
     def _delete(self, path, params={}):
-        params.update({"recvWindow": config.recv_window})
+        params.update({"recvWindow": self.recv_windows})
         query = urlencode(self._sign(params))
         url = "%s?%s" % (path, query)
         header = {"X-MBX-APIKEY": self.key}
@@ -162,3 +165,15 @@ class BinanceAPI:
 
     def _format(self, price):
         return "{:.8f}".format(price)
+
+    def _timestamp(self, server_time):
+        time = str(server_time)
+        # time = time[:10]
+        time = int(time)
+        return time
+
+    def _convert_date(self, timestamp):
+        date_time = datetime.fromtimestamp(timestamp)
+        print(date_time.strftime("%d/%m/%Y %H:%M:%S"))
+        return date_time.strftime("%d/%m/%Y %H:%M:%S")
+
