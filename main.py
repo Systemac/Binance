@@ -5,7 +5,7 @@ test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windo
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    essai = test.get_klines("XRPBTC", interval='1m', delta=7200000)
+    essai = test.get_klines("BLZBTC")
     visu = Visualizer(essai)
     visu.visu_data()
     """essai = test.get_history("BTCUSDT", 10000)

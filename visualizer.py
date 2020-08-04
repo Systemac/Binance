@@ -2,9 +2,9 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
-import mplfinance as mpf
-import pandas as pd
+
 from binance_api import BinanceAPI
+
 
 class Visualizer:
 
@@ -12,8 +12,6 @@ class Visualizer:
         self.data = data
 
     def visu_data(self):
-        # print(self.data)
-        # df = pd.DataFrame(columns=["Open", "High", "Low", "Close", "Volume"])
         reformatted_data = dict()
         reformatted_data['Date'] = []
         reformatted_data['Open'] = []
@@ -28,8 +26,6 @@ class Visualizer:
             reformatted_data['Low'].append(float(i[3]))
             reformatted_data['Close'].append(float(i[4]))
             reformatted_data['Volume'].append(float(i[5]))
-            # print(i)
-            # df.loc[self._convert_date(i[0])] = {"Open": i[1], "High": i[2], "Low": i[3], "Close": i[4], "Volume": i[5]}
         df = pd.DataFrame.from_dict(reformatted_data)
         df.set_index('Date', inplace=True)
         print(df)

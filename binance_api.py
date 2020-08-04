@@ -36,10 +36,11 @@ class BinanceAPI:
         params = {"symbol": market, "limit": limit}
         return self._get_no_sign(path, params)
 
-    def get_klines(self, market, interval, delta=3600):
+    def get_klines(self, market, interval="1m", delta=3600, offset=0):
+        delta = delta*1000
         time = self._timestamp(self.get_server_time()['serverTime'])
         path = "%s/klines" % self.BASE_URL_V3
-        params = {"symbol": market, "interval": interval, "startTime": time - delta, "endTime": time}
+        params = {"symbol": market, "interval": interval, "startTime": time-delta-offset, "endTime": time-offset}
         return self._get_no_sign(path, params)
 
     def get_ticker(self, market):
