@@ -31,8 +31,4 @@ class Visualizer:
         print(df)
         mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
 
-    def _convert_date(self, timestamp):
-        time = str(timestamp)
-        time = time[:10]
-        time = int(time)
-        return time
+

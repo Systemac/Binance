@@ -1,13 +1,11 @@
 from config import config
-from visualizer import Visualizer
 from binance_api import BinanceAPI
 test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windows=config.get("recv_windows"))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    essai = test.get_klines("BLZBTC")
-    visu = Visualizer(essai)
-    visu.visu_data()
+    essai = test.get_klines("XRPBTC", delta=7200, offset=3600)
+    test.visu_data(essai)
     """essai = test.get_history("BTCUSDT", 10000)
     for i in essai:
         print(i['time'])

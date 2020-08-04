@@ -3,6 +3,8 @@ import hashlib
 import requests
 import hmac
 from datetime import datetime
+import mplfinance as mpf
+import pandas as pd
 import config
 
 try:
@@ -38,7 +40,8 @@ class BinanceAPI:
 
     def get_klines(self, market, interval="1m", delta=3600, offset=0):
         delta = delta*1000
-        time = self._timestamp(self.get_server_time()['serverTime'])
+        offset = offset*1000
+        time = self.get_server_time()['serverTime']
         path = "%s/klines" % self.BASE_URL_V3
         params = {"symbol": market, "interval": interval, "startTime": time-delta-offset, "endTime": time-offset}
         return self._get_no_sign(path, params)
@@ -108,6 +111,28 @@ class BinanceAPI:
         params = {"symbol": market, "orderId": order_id}
         return self._delete(path, params)
 
+    def visu_data(self, data):
+        reformatted_data = {
+            'Date': [],
+            'Open': [],
+            'High': [],
+            'Low': [],
+            'Close': [],
+            'Volume': [],
+        }
+
+        for i in data:
+            reformatted_data['Date'].append(datetime.fromtimestamp(self._convert_date(i[0])))
+            reformatted_data['Open'].append(float(i[1]))
+            reformatted_data['High'].append(float(i[2]))
+            reformatted_data['Low'].append(float(i[3]))
+            reformatted_data['Close'].append(float(i[4]))
+            reformatted_data['Volume'].append(float(i[5]))
+        df = pd.DataFrame.from_dict(reformatted_data)
+        df.set_index('Date', inplace=True)
+        print(df)
+        mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
+
     def _get_no_sign(self, path, params={}):
         query = urlencode(params)
         header = {"X-MBX-APIKEY": self.key}
@@ -174,7 +199,8 @@ class BinanceAPI:
         return time
 
     def _convert_date(self, timestamp):
-        date_time = datetime.fromtimestamp(timestamp)
-        print(date_time.strftime("%d/%m/%Y %H:%M:%S"))
-        return date_time.strftime("%d/%m/%Y %H:%M:%S")
+        time = str(timestamp)
+        time = time[:10]
+        time = int(time)
+        return time
 
