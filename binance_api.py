@@ -4,6 +4,7 @@ import requests
 import hmac
 from datetime import datetime
 import mplfinance as mpf
+import matplotlib.pyplot as plt
 import pandas as pd
 import config
 
@@ -120,7 +121,6 @@ class BinanceAPI:
             'Close': [],
             'Volume': [],
         }
-
         for i in data:
             reformatted_data['Date'].append(datetime.fromtimestamp(self._convert_date(i[0])))
             reformatted_data['Open'].append(float(i[1]))
@@ -130,8 +130,93 @@ class BinanceAPI:
             reformatted_data['Volume'].append(float(i[5]))
         df = pd.DataFrame.from_dict(reformatted_data)
         df.set_index('Date', inplace=True)
+        df = self.macd_strat(df)
+        df = self.get_rsi_timeseries(df)
+        df = self.achat(df)
         print(df)
+        fig, ax = plt.subplots(3, sharex=True)
+        ax[0].plot(df['Close'], label='test')
+        ax[0].plot(df['Achat'], marker=6, color='g')
+        ax[0].plot(df['Close'].ewm(span=200).mean(), label='MME 50')
+        ax[0].grid(linestyle=':', linewidth='1')
+        ax[0].legend(loc='best')
+        ax[1].plot(df['RSI'], label='RSI')
+        ax[1].axhline(y=30, color='r', label='RSI 30')
+        ax[1].axhline(y=70, color='blue', label='RSI 70')
+        ax[1].legend(loc='best')
+        ax[2].plot(df['macd'], color='k', label='MACD')
+        ax[2].plot(df['Signal'], color='r', label='Signal Line')
+        secax = ax[2].twinx()
+        secax.plot(df['Achat'], marker="|", color='black')
+        ax[2].legend(loc='best')
+        plt.show()
         mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
+
+    def get_rsi_timeseries(self, prices, n=14):
+        df_ = prices['Close']
+        # RSI = 100 - (100 / (1 + RS))
+        # where RS = (Wilder-smoothed n-period average of gains / Wilder-smoothed n-period average of -losses)
+        # Note that losses above should be positive values
+        # Wilder-smoothing = ((previous smoothed avg * (n-1)) + current value to average) / n
+        # For the very first "previous smoothed avg" (aka the seed value), we start with a straight average.
+        # Therefore, our first RSI value will be for the n+2nd period:
+        #     0: first delta is nan
+        #     1:
+        #     ...
+        #     n: lookback period for first Wilder smoothing seed value
+        #     n+1: first RSI
+        # First, calculate the gain or loss from one price to the next. The first value is nan so replace with 0.
+        deltas = (df_ - df_.shift(1)).fillna(0)
+        # Calculate the straight average seed values.
+        # The first delta is always zero, so we will use a slice of the first n deltas starting at 1,
+        # and filter only deltas > 0 to get gains and deltas < 0 to get losses
+        avg_of_gains = deltas[1:n + 1][deltas > 0].sum() / n
+        avg_of_losses = -deltas[1:n + 1][deltas < 0].sum() / n
+        # Set up pd.Series container for RSI values
+        rsi_series = pd.Series(0.0, deltas.index)
+        # Now calculate RSI using the Wilder smoothing method, starting with n+1 delta.
+        up = lambda x: x if x > 0 else 0
+        down = lambda x: -x if x < 0 else 0
+        i = n + 1
+        for d in deltas[n + 1:]:
+            avg_of_gains = ((avg_of_gains * (n - 1)) + up(d)) / n
+            avg_of_losses = ((avg_of_losses * (n - 1)) + down(d)) / n
+            if avg_of_losses != 0:
+                rs = avg_of_gains / avg_of_losses
+                rsi_series[i] = 100 - (100 / (1 + rs))
+            else:
+                rsi_series[i] = 100
+            i += 1
+        prices['RSI'] = rsi_series
+        return prices
+
+    def macd_strat(self, df, petit=12, grand=26, ecart=9):
+        df_ = df['Close']
+        exp1 = df_.ewm(span=petit, adjust=False).mean()
+        exp2 = df_.ewm(span=grand, adjust=False).mean()
+        df['macd'] = exp1 - exp2
+        df['Signal'] = df['macd'].ewm(span=ecart, adjust=False).mean()
+        return df
+
+    def achat(self, df):
+        df_ = df['RSI'].values
+        df_macd = df['macd'].values
+        df_signal = df['Signal'].values
+        achat = pd.Series(0.0, df.index)
+        for i in range(len(df_)):
+            if df_[i] > 30:
+                if (
+                        df_[i - 1] < 30
+                        and df_macd[i - 1] < df_macd[i]
+                        and df_signal[i - 1] < df_signal[i]
+                ):
+                    achat[i] = df['Close'][i] - 0.5
+            else:
+                achat[i] = 0
+        df['Achat'] = achat
+        df['Achat'][df['Achat'] == 0] = None
+        # print(achat[-1])
+        return df
 
     def _get_no_sign(self, path, params={}):
         query = urlencode(params)
