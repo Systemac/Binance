@@ -5,7 +5,6 @@ import hmac
 from datetime import datetime
 import mplfinance as mpf
 import pandas as pd
-import config
 
 try:
     from urllib import urlencode
