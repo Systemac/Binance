@@ -60,8 +60,13 @@ class BinanceAPI:
         path = "%s/account" % self.BASE_URL_V3
         return self._get(path, {})
 
+    def get_prices(self):
+        path = "%s/ticker/price" % self.BASE_URL_V3
+        return self._get_no_sign(path)
+
     def get_products(self):
-        return requests.get(self.PUBLIC_URL, timeout=30, verify=True).json()
+        path = "%s/exchangeInfo" % self.BASE_URL_V3
+        return requests.get(path, timeout=30, verify=True).json()
 
     def get_server_time(self):
         path = "%s/time" % self.BASE_URL_V3
@@ -149,7 +154,7 @@ class BinanceAPI:
         secax.plot(df['Achat'], marker="|", color='black')
         ax[2].legend(loc='best')
         plt.show()
-        mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
+        # mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
 
     def get_rsi_timeseries(self, prices, n=14):
         df_ = prices['Close']

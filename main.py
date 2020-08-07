@@ -4,8 +4,14 @@ test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windo
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    essai = test.get_klines("XRPBTC", interval="5m", delta=72000, offset=3600)
-    test.visu_data(essai)
+    print(test.get_prices())
+    """for _ in range(10):
+        result = test.get_products()
+        longueur = len(result['symbols'])
+        for i in range(longueur):
+            print(result['symbols'][i])"""
+    """essai = test.get_klines("BTCUSDT", interval="3m", delta=10800, offset=_*3600)
+        test.visu_data(essai)"""
     """essai = test.get_history("BTCUSDT", 10000)
     for i in essai:
         print(i['time'])
