@@ -1,11 +1,12 @@
-import time
 import hashlib
-import requests
 import hmac
+import time
 from datetime import datetime
+
 import mplfinance as mpf
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import requests
 
 try:
     from urllib import urlencode
@@ -136,25 +137,65 @@ class BinanceAPI:
         df.set_index('Date', inplace=True)
         df = self.macd_strat(df)
         df = self.get_rsi_timeseries(df)
+        df = self.bollinger_band(df)
         df = self.achat(df)
         print(df)
-        fig, ax = plt.subplots(3, sharex=True)
-        ax[0].plot(df['Close'], label='test')
-        ax[0].plot(df['Achat'], marker=6, color='g')
-        ax[0].plot(df['Close'].ewm(span=200).mean(), label='MME 50')
-        ax[0].grid(linestyle=':', linewidth='1')
-        ax[0].legend(loc='best')
-        ax[1].plot(df['RSI'], label='RSI')
-        ax[1].axhline(y=30, color='r', label='RSI 30')
-        ax[1].axhline(y=70, color='blue', label='RSI 70')
-        ax[1].legend(loc='best')
-        ax[2].plot(df['macd'], color='k', label='MACD')
-        ax[2].plot(df['Signal'], color='r', label='Signal Line')
-        secax = ax[2].twinx()
-        secax.plot(df['Achat'], marker="|", color='black')
-        ax[2].legend(loc='best')
-        plt.show()
-        # mpf.plot(df, type='candle', mav=(7, 14, 26), volume=True)
+        # fig, ax = plt.subplots(3, sharex=True)
+        # ax[0].plot(df['Close'], label='test')
+        # ax[0].plot(df['Achat'], marker=6, color='g')
+        # ax[0].plot(df['Close'].ewm(span=200).mean(), label='MME 50')
+        # ax[0].grid(linestyle=':', linewidth='1')
+        # ax[0].legend(loc='best')
+        # ax[1].plot(df['RSI'], label='RSI')
+        # ax[1].axhline(y=30, color='r', label='RSI 30')
+        # ax[1].axhline(y=70, color='blue', label='RSI 70')
+        # ax[1].legend(loc='best')
+        # ax[2].plot(df['macd'], color='k', label='MACD')
+        # ax[2].plot(df['Signal'], color='r', label='Signal Line')
+        # secax = ax[2].twinx()
+        # secax.plot(df['Achat'], marker="|", color='black')
+        # ax[2].legend(loc='best')
+        # plt.show()
+        low_signal = self._percentB_belowzero(df['percentB'], df['Close'])
+        high_signal = self._percentB_aboveone(df['percentB'], df['Close'])
+        print(high_signal)
+        print(low_signal)
+        boll = df[['MB', 'HighB', 'LowB']]
+        apt = [mpf.make_addplot(boll),
+               mpf.make_addplot(low_signal, type='scatter', markersize=200, marker='^'),
+               mpf.make_addplot(high_signal, type='scatter', markersize=200, marker='v'),
+               mpf.make_addplot(df['percentB'], panel=2)]
+        mpf.plot(df, type='candle', figscale=1.25, volume=True, addplot=apt)
+
+    def _percentB_belowzero(self, percentB, price):
+        signal = []
+        previous = -1.0
+        for date, value in percentB.iteritems():
+            if value < 0 <= previous:
+                signal.append(price[date])
+            else:
+                signal.append(np.nan)
+            previous = value
+        return signal
+
+    def _percentB_aboveone(self, percentB, price):
+        signal = []
+        previous = 2
+        for date, value in percentB.iteritems():
+            if value > 1 >= previous:
+                signal.append(price[date])
+            else:
+                signal.append(np.nan)
+            previous = value
+        return signal
+
+    def bollinger_band(self, df, fenetre=20, std=2):
+        df['MB'] = df['Close'].rolling(fenetre).mean()
+        rolling_std = df['Close'].rolling(fenetre).std()
+        df['HighB'] = df['MB'] + (rolling_std * std)
+        df['LowB'] = df['MB'] - (rolling_std * std)
+        df['percentB'] = (df['Close'] - df['LowB']) / (df['HighB'] - df['LowB'])
+        return df
 
     def get_rsi_timeseries(self, prices, n=14):
         df_ = prices['Close']
