@@ -24,6 +24,7 @@ class BinanceAPI:
         self.key = key
         self.secret = secret
         self.recv_windows = recv_windows
+        self.portfolio = {}
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -40,11 +41,11 @@ class BinanceAPI:
         return self._get_no_sign(path, params)
 
     def get_klines(self, market, interval="1m", delta=3600, offset=0):
-        delta = delta*1000
-        offset = offset*1000
+        delta = delta * 1000
+        offset = offset * 1000
         time = self.get_server_time()['serverTime']
         path = "%s/klines" % self.BASE_URL_V3
-        params = {"symbol": market, "interval": interval, "startTime": time-delta-offset, "endTime": time-offset}
+        params = {"symbol": market, "interval": interval, "startTime": time - delta - offset, "endTime": time - offset}
         return self._get_no_sign(path, params)
 
     def get_ticker(self, market):
@@ -61,6 +62,19 @@ class BinanceAPI:
         path = "%s/account" % self.BASE_URL_V3
         return self._get(path, {})
 
+    def get_portfolio(self):
+        data = self.get_account()
+        dico = {}
+        for _ in data['balances']:
+            if float(_['free']) != 0:
+                print(f"asset : {_['asset']}")
+                print(f"libre : {_['free']}")
+                print(f"bloqué : {_['locked']}")
+                dico[_['asset']] = {
+                    'free' : _['free'],
+                    'locked' : _['locked']}
+        self.portfolio = dico
+
     def get_prices(self):
         path = "%s/ticker/price" % self.BASE_URL_V3
         return self._get_no_sign(path)
@@ -72,6 +86,11 @@ class BinanceAPI:
     def get_server_time(self):
         path = "%s/time" % self.BASE_URL_V3
         return requests.get(path, timeout=30, verify=True).json()
+
+    def get_listenkey(self):
+        path = "%s/userDataStream" % self.BASE_URL_V3
+        header = {"X-MBX-APIKEY": self.key}
+        return requests.post(path, headers=header).json()
 
     def get_exchange_info(self):
         path = "%s/exchangeInfo" % self.BASE_URL
@@ -139,6 +158,9 @@ class BinanceAPI:
         df = self.get_rsi_timeseries(df)
         df = self.bollinger_band(df)
         df = self.achat(df)
+        for _ in df:
+            df['RSI30'] = 30
+            df['RSI70'] = 70
         print(df)
         # fig, ax = plt.subplots(3, sharex=True)
         # ax[0].plot(df['Close'], label='test')
@@ -156,29 +178,38 @@ class BinanceAPI:
         # secax.plot(df['Achat'], marker="|", color='black')
         # ax[2].legend(loc='best')
         # plt.show()
-        low_signal = self._percentB_belowzero(df['percentB'], df['Close'])
-        high_signal = self._percentB_aboveone(df['percentB'], df['Close'])
-        print(high_signal)
-        print(low_signal)
+        df['lowSignal'] = self._percentB_belowzero(df)
+        df['highSignal'] = self._percentB_aboveone(df)
+        df.tail()
         boll = df[['MB', 'HighB', 'LowB']]
+        rsi = df[['RSI', 'RSI30', 'RSI70']]
         apt = [mpf.make_addplot(boll),
-               mpf.make_addplot(low_signal, type='scatter', markersize=200, marker='^'),
-               mpf.make_addplot(high_signal, type='scatter', markersize=200, marker='v'),
-               mpf.make_addplot(df['percentB'], panel=2)]
+               mpf.make_addplot(df['lowSignal'], type='scatter', markersize=200, marker='^'),
+               mpf.make_addplot(df['highSignal'], type='scatter', markersize=200, marker='v'),
+               mpf.make_addplot(df['percentB'], panel=2, color='r'),
+               mpf.make_addplot(rsi, panel=2, color='g'),
+               mpf.make_addplot(df["macd"], color='black', panel=3),
+               mpf.make_addplot(df["Signal"], color='r', panel=3)]
         mpf.plot(df, type='candle', figscale=1.25, volume=True, addplot=apt)
 
-    def _percentB_belowzero(self, percentB, price):
+    def _percentB_belowzero(self, df):
+        percentB = df['percentB']
+        price = df['Close']
+        rsi = df['RSI']
         signal = []
         previous = -1.0
         for date, value in percentB.iteritems():
-            if value < 0 <= previous:
+            if value < 0 <= previous and rsi[date] < 30:
                 signal.append(price[date])
             else:
                 signal.append(np.nan)
             previous = value
         return signal
 
-    def _percentB_aboveone(self, percentB, price):
+    def _percentB_aboveone(self, df):
+        percentB = df['percentB']
+        price = df['Close']
+        rsi = df['RSI']
         signal = []
         previous = 2
         for date, value in percentB.iteritems():
@@ -292,7 +323,7 @@ class BinanceAPI:
     def _post(self, path, params={}):
         params.update({"recvWindow": self.recv_windows})
         query = urlencode(self._sign(params))
-        url = "%s" % (path)
+        url = "%s" % path
         header = {"X-MBX-APIKEY": self.key}
         return requests.post(url, headers=header, data=query, timeout=30, verify=True).json()
 
@@ -333,4 +364,3 @@ class BinanceAPI:
         time = time[:10]
         time = int(time)
         return time
-
