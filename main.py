@@ -18,7 +18,7 @@ if __name__ == '__main__':
         longueur = len(result['symbols'])
         for i in range(longueur):
             print(result['symbols'][i])"""
-    essai = test.get_klines("BNBBTC", interval="5m", delta=200000)
+    essai = test.get_klines("LINKBTC", interval="5m", delta=200000)
     test.visu_data(essai)
     """essai = test.get_history("BTCUSDT", 10000)
     for i in essai:
