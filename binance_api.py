@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import math
 import time
 from datetime import datetime
 
@@ -25,6 +26,9 @@ class BinanceAPI:
         self.secret = secret
         self.recv_windows = recv_windows
         self.portfolio = {}
+        self.sorted_btc = []
+        self.assets = []
+        self.get_portfolio()
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -43,9 +47,10 @@ class BinanceAPI:
     def get_klines(self, market, interval="1m", delta=3600, offset=0):
         delta = delta * 1000
         offset = offset * 1000
-        time = self.get_server_time()['serverTime']
+        times = self.get_server_time()['serverTime']
         path = "%s/klines" % self.BASE_URL_V3
-        params = {"symbol": market, "interval": interval, "startTime": time - delta - offset, "endTime": time - offset}
+        params = {"symbol": market, "interval": interval, "startTime": times - delta - offset,
+                  "endTime": times - offset}
         return self._get_no_sign(path, params)
 
     def get_ticker(self, market):
@@ -67,16 +72,32 @@ class BinanceAPI:
         dico = {}
         for _ in data['balances']:
             if float(_['free']) != 0:
-                print(f"asset : {_['asset']}")
-                print(f"libre : {_['free']}")
-                print(f"bloqué : {_['locked']}")
                 dico[_['asset']] = {
-                    'free' : _['free'],
-                    'locked' : _['locked']}
+                    'free': float(_['free']),
+                    'locked': float(_['locked'])}
         self.portfolio = dico
+
+    def get_assets_to_follow(self):
+        pass  # TODO: Générer la liste des 10 valeurs ayant eu le plus de volumes sur les dernieres 24 heures.
+
+    def get_sorted_symbol_by_volume(self):
+        essai = self.get_prices()
+        essai2 = self.get_prices_change()
+        liste = []
+        for i in essai:
+            if i['symbol'][-3:] == 'BTC':
+                for j in essai2:
+                    if j['symbol'] == i['symbol']:
+                        volume = float(i["price"]) * float(j['volume'])
+                        liste.append((i["symbol"], float(i["price"]), volume))
+        self.sorted_btc = sorted(liste, key=lambda price: price[2], reverse=True)
 
     def get_prices(self):
         path = "%s/ticker/price" % self.BASE_URL_V3
+        return self._get_no_sign(path)
+
+    def get_prices_change(self):
+        path = "%s/ticker/24hr" % self.BASE_URL_V3
         return self._get_no_sign(path)
 
     def get_products(self):
@@ -136,7 +157,7 @@ class BinanceAPI:
         params = {"symbol": market, "orderId": order_id}
         return self._delete(path, params)
 
-    def visu_data(self, data):
+    def _prepa_visu_or_opportunity(self, data):
         reformatted_data = {
             'Date': [],
             'Open': [],
@@ -158,28 +179,25 @@ class BinanceAPI:
         df = self.get_rsi_timeseries(df)
         df = self.bollinger_band(df)
         df = self.achat(df)
+        df['lowSignal'] = self._percentB_belowzero(df)
+        df['highSignal'] = self._percentB_aboveone(df)
+        print(df)
+        return df
+
+    def _get_opportunity(self, data):
+        df = self._prepa_visu_or_opportunity(data)
+        return not math.isnan(df.iloc[-1, -2])
+
+    def get_opportunity(self, data):
+        achat = self._get_opportunity(data)
+        print(achat)
+        return achat
+
+    def visu_data(self, dfi):
+        df = self._prepa_visu_or_opportunity(dfi)
         for _ in df:
             df['RSI30'] = 30
             df['RSI70'] = 70
-        print(df)
-        # fig, ax = plt.subplots(3, sharex=True)
-        # ax[0].plot(df['Close'], label='test')
-        # ax[0].plot(df['Achat'], marker=6, color='g')
-        # ax[0].plot(df['Close'].ewm(span=200).mean(), label='MME 50')
-        # ax[0].grid(linestyle=':', linewidth='1')
-        # ax[0].legend(loc='best')
-        # ax[1].plot(df['RSI'], label='RSI')
-        # ax[1].axhline(y=30, color='r', label='RSI 30')
-        # ax[1].axhline(y=70, color='blue', label='RSI 70')
-        # ax[1].legend(loc='best')
-        # ax[2].plot(df['macd'], color='k', label='MACD')
-        # ax[2].plot(df['Signal'], color='r', label='Signal Line')
-        # secax = ax[2].twinx()
-        # secax.plot(df['Achat'], marker="|", color='black')
-        # ax[2].legend(loc='best')
-        # plt.show()
-        df['lowSignal'] = self._percentB_belowzero(df)
-        df['highSignal'] = self._percentB_aboveone(df)
         df.tail()
         boll = df[['MB', 'HighB', 'LowB']]
         rsi = df[['RSI', 'RSI30', 'RSI70']]
