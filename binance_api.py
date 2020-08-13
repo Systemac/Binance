@@ -26,9 +26,9 @@ class BinanceAPI:
         self.secret = secret
         self.recv_windows = recv_windows
         self.portfolio = {}
-        self.sorted_btc = []
         self.assets = []
         self.get_portfolio()
+        self.get_assets_to_follow()
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -78,7 +78,16 @@ class BinanceAPI:
         self.portfolio = dico
 
     def get_assets_to_follow(self):
-        pass  # TODO: Générer la liste des 10 valeurs ayant eu le plus de volumes sur les dernieres 24 heures.
+        i = self.portfolio
+        for j in i:
+            if i[j]['locked'] != 0:
+                self.assets.append(f"{j}BTC")
+        l = self.get_sorted_symbol_by_volume()
+        k = 0
+        while len(self.assets) < 7:
+            if l[k][0] not in self.assets:
+                self.assets.append(l[k][0])
+            k += 1
 
     def get_sorted_symbol_by_volume(self):
         essai = self.get_prices()
@@ -90,7 +99,7 @@ class BinanceAPI:
                     if j['symbol'] == i['symbol']:
                         volume = float(i["price"]) * float(j['volume'])
                         liste.append((i["symbol"], float(i["price"]), volume))
-        self.sorted_btc = sorted(liste, key=lambda price: price[2], reverse=True)
+        return sorted(liste, key=lambda price: price[2], reverse=True)
 
     def get_prices(self):
         path = "%s/ticker/price" % self.BASE_URL_V3

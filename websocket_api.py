@@ -4,61 +4,6 @@ import time
 
 import websocket
 
-from binance_api import BinanceAPI
-from config import config
-
-test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windows=config.get("recv_windows"))
-cle = test.get_listenkey()['listenKey']
-print(cle)
-
-
-# def on_message(ws, message):
-#     # print("### Message ###")
-#     test = json.loads(message)
-#     print(test['p'])
-#     print(type(test['p']))
-#
-#
-# def on_error(ws, error):
-#     print(error)
-#
-#
-# def on_close(ws):
-#     print("### closed ###")
-#
-#
-# def on_open(ws):
-#     def run(*args):
-#         # send the message, then wait
-#         # so thread doesn't exit and socket
-#         # isn't closed
-#         header = {
-#             "method": "SUBSCRIBE",
-#             "params": [
-#                 "btcusdt@aggTrade",
-#                 "btcusdt@depth"
-#             ],
-#             "id": 1}
-#
-#         ws.send()
-#         ws.close()
-#         print("Thread terminating...")
-#
-#     Thread(target=run).start()
-#
-#
-# if __name__ == "__main__":
-#     websocket.enableTrace(True)
-#     if len(sys.argv) < 2:
-#         host = f"wss://stream.binance.com:9443/ws/linkbtc@trade"
-#     else:
-#         host = sys.argv[1]
-#     ws = websocket.WebSocketApp(host,
-#                                 on_message=on_message,
-#                                 on_error=on_error,
-#                                 on_close=on_close)
-#     ws.on_open = on_open
-#     ws.run_forever()
 
 class WSClient(threading.Thread):
     wsc = None
@@ -68,6 +13,8 @@ class WSClient(threading.Thread):
 
         self.symbol = symbol
         threading.Thread.__init__(self)
+        self.first_price = 0
+        self.price = 0
 
     def __shortcuts__(self, key):
 
@@ -88,7 +35,7 @@ class WSClient(threading.Thread):
     def run(self):
 
         wsc_url = f"wss://stream.binance.com:9443/ws/{self.symbol.lower()}@trade"
-        websocket.enableTrace(True)
+        # websocket.enableTrace(True)
         self.wsc = websocket.WebSocketApp(wsc_url,
                                           on_message=self.on_message,
                                           on_error=self.on_error)
@@ -96,9 +43,6 @@ class WSClient(threading.Thread):
 
         while not self.stop:
             self.wsc.run_forever(ping_interval=10)
-
-            if self.stop:
-                break
 
             time.sleep(5)
 
@@ -112,19 +56,30 @@ class WSClient(threading.Thread):
     def on_message(self, message):
 
         test = json.loads(message)
-        print(test['p'])
-        print(type(test['p']))
+        if self.first_price == 0:
+            self.first_price = float(test['p'])
+        self.price = float(test['p'])
+        variation = self.price / self.first_price
+        # print(
+        #     f"{self.symbol} : prix d'achat : {self.first_price}, prix actuel : {self.price}, variation : {round(variation, 4)}")
+        if (self.price > self.first_price * 1.003) or (self.price < self.first_price * 0.997):
+            print(
+                f"{self.symbol}: entrée: {self.first_price}, sortie: {self.price} {'-' if self.first_price > self.price else '+'}")
+            print('##### OKI #####')
+            self.stop_client()
         # TODO : generer le prix en local pour l'objet qui contiendra le symbol uniquement.
 
     def stop_client(self):
-
         self.stop = True
-
         if self.wsc is not None:
             self.wsc.close()
 
 
-a = WSClient(symbol="LINKBTC")
-a.start()
-time.sleep(15)
-a.stop_client()
+class Base_de_script:
+
+    def __init__(self, symbol, order=False):
+        self.symbol = symbol
+        self.order = order
+
+    def suivi(self):
+        pass
