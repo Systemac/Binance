@@ -29,6 +29,7 @@ class BinanceAPI:
         self.assets = []
         self.get_portfolio()
         self.get_assets_to_follow()
+        self.products = self.get_products()
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -135,6 +136,19 @@ class BinanceAPI:
         path = "%s/myTrades" % self.BASE_URL_V3
         params = {"symbol": market, "limit": limit}
         return self._get(path, params)
+
+    def calcul_quantity(self, asset):
+        # TODO: calcul de la quantité d'achat en fonction du quart de BTC dispo: ici récup de la quantité mini
+        btc_free = self.portfolio['BTC']['free']
+        print(btc_free)
+        print(type(btc_free))
+        essai = self.get_prices()
+        # ca doit donc etre un multiple de ca
+        for i in self.products['symbols']:
+            if i['symbol'][-3:] == 'BTC' and i['symbol'][:-3] == asset:
+                for j in essai:
+                    if j['symbol'] == f"{asset}BTC":
+                        print(f"{i['symbol']}: {i['filters'][2]['minQty']} {(float(j['price']) / btc_free)}")
 
     def buy_limit(self, market, quantity, rate):
         path = "%s/order" % self.BASE_URL_V3

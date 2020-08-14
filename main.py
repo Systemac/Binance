@@ -1,16 +1,15 @@
 from binance_api import BinanceAPI
 from config import config
-from websocket_api import WSClient
 
 test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windows=config.get("recv_windows"))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    for _ in test.assets:
-        _ = WSClient(_)
-        _.start()
-        print(_.getName())
-
+    # for _ in test.assets:
+    #     _ = WSClient(_)
+    #     _.start()
+    #     print(_.getName())
+    test.calcul_quantity('LINK')
     # print(test.get_my_trades("ETHBTC"))
     # print(test.sell_limit("ETHBTC", 0.027, rate=None))
     # liste = []
