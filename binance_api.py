@@ -148,7 +148,11 @@ class BinanceAPI:
             if i['symbol'][-3:] == 'BTC' and i['symbol'][:-3] == asset:
                 for j in essai:
                     if j['symbol'] == f"{asset}BTC":
-                        print(f"{i['symbol']}: {i['filters'][2]['minQty']} {(float(j['price']) / btc_free)}")
+                        print(
+                            f"{i['filters'][2]['minQty']} : {i['filters'][2]['minQty'].find('1')} : {i['filters'][2]['minQty'].find('.')}")
+                        rec = i['filters'][2]['minQty'].find('1') - i['filters'][2]['minQty'].find('.')
+                        print(
+                            f"{i['symbol']}: {i['filters'][2]['minQty']}  {float(j['price']) / btc_free} / {round(float(j['price']) / btc_free, rec)}")
 
     def buy_limit(self, market, quantity, rate):
         path = "%s/order" % self.BASE_URL_V3
