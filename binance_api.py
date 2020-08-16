@@ -151,9 +151,9 @@ class BinanceAPI:
         essai = self.get_prices()
         # ca doit donc etre un multiple de ca
         for i in self.products['symbols']:
-            if i['symbol'][-3:] == 'BTC' and i['symbol'][:-3] == asset:
+            if i['symbol'] == asset:
                 for j in essai:
-                    if j['symbol'] == f"{asset}BTC":
+                    if j['symbol'] == asset:
                         print(
                             f"{i['filters'][2]['minQty']} : {i['filters'][2]['minQty'].find('1')} : {i['filters'][2]['minQty'].find('.')}")
                         rec = i['filters'][2]['minQty'].find('1') - i['filters'][2]['minQty'].find('.')
@@ -165,6 +165,17 @@ class BinanceAPI:
     def buy_limit(self, market, quantity, rate):
         path = "%s/order" % self.BASE_URL_V3
         params = self._order(market, quantity, "BUY", rate)
+        return self._post(path, params)
+
+    def stop_loss(self, market, quantity, price):
+        path = "%s/order" % self.BASE_URL_V3
+        params = {
+            'symbol': market,
+            'side': 'SELL',
+            'type': 'STOP_LOSS',
+            'stopPrice': price,
+            'quantity': quantity
+        }
         return self._post(path, params)
 
     def sell_limit(self, market, quantity, rate):

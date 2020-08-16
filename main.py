@@ -5,13 +5,15 @@ test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windo
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    for i in test.get_my_trades('ETHBTC'):
+        print(i)
     # for _ in test.assets:
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
-    test.calcul_quantity('ETH')
-    for i in test.assets:
-        test.calcul_quantity(i[:-3])
+    # test.calcul_quantity('ETHBTC')
+    # for i in test.assets:
+    #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))
     # print(test.sell_limit("ETHBTC", 0.027, rate=None))
     # liste = []
