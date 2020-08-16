@@ -31,6 +31,12 @@ class BinanceAPI:
         self.get_assets_to_follow()
         self.products = self.get_products()
 
+    def truncate(self, number, digits) -> float:
+        if digits < 0:
+            digits += 1
+        stepper = 10.0 ** digits
+        return math.trunc(stepper * number) / stepper
+
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
         return requests.get(path, timeout=30, verify=True).json()
@@ -139,9 +145,9 @@ class BinanceAPI:
 
     def calcul_quantity(self, asset):
         # TODO: calcul de la quantité d'achat en fonction du quart de BTC dispo: ici récup de la quantité mini
-        btc_free = self.portfolio['BTC']['free']
+        btc_free = self.portfolio['BTC']['free'] / 4
         print(btc_free)
-        print(type(btc_free))
+        # print(type(btc_free))
         essai = self.get_prices()
         # ca doit donc etre un multiple de ca
         for i in self.products['symbols']:
@@ -151,8 +157,10 @@ class BinanceAPI:
                         print(
                             f"{i['filters'][2]['minQty']} : {i['filters'][2]['minQty'].find('1')} : {i['filters'][2]['minQty'].find('.')}")
                         rec = i['filters'][2]['minQty'].find('1') - i['filters'][2]['minQty'].find('.')
+                        print(rec)
+                        amount = btc_free / float(j['price'])
                         print(
-                            f"{i['symbol']}: {i['filters'][2]['minQty']}  {float(j['price']) / btc_free} / {round(float(j['price']) / btc_free, rec)}")
+                            f"{i['symbol']}: {i['filters'][2]['minQty']}  {amount} / {self.truncate(amount, rec)}")
 
     def buy_limit(self, market, quantity, rate):
         path = "%s/order" % self.BASE_URL_V3

@@ -9,7 +9,9 @@ if __name__ == '__main__':
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
-    test.calcul_quantity('LINK')
+    test.calcul_quantity('ETH')
+    for i in test.assets:
+        test.calcul_quantity(i[:-3])
     # print(test.get_my_trades("ETHBTC"))
     # print(test.sell_limit("ETHBTC", 0.027, rate=None))
     # liste = []
