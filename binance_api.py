@@ -37,6 +37,9 @@ class BinanceAPI:
         stepper = 10.0 ** digits
         return math.trunc(stepper * number) / stepper
 
+    def follow(self, asset):
+        pass  # TODO: script de suivi de la monnaie
+
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
         return requests.get(path, timeout=30, verify=True).json()
@@ -144,7 +147,6 @@ class BinanceAPI:
         return self._get(path, params)
 
     def calcul_quantity(self, asset):
-        # TODO: calcul de la quantité d'achat en fonction du quart de BTC dispo: ici récup de la quantité mini
         btc_free = self.portfolio['BTC']['free'] / 4
         print(btc_free)
         # print(type(btc_free))
