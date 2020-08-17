@@ -51,7 +51,7 @@ class BinanceAPI:
         params = {"symbol": market, "limit": limit}
         return self._get_no_sign(path, params)
 
-    def get_klines(self, market, interval="1m", delta=3600, offset=0):
+    def get_klines(self, market, interval="1m", delta=200000, offset=0):
         delta = delta * 1000
         offset = offset * 1000
         times = self.get_server_time()['serverTime']
@@ -227,7 +227,7 @@ class BinanceAPI:
         df = self.achat(df)
         df['lowSignal'] = self._percentB_belowzero(df)
         df['highSignal'] = self._percentB_aboveone(df)
-        print(df)
+        # print(df)
         return df
 
     def _get_opportunity(self, data):
@@ -235,9 +235,8 @@ class BinanceAPI:
         return not math.isnan(df.iloc[-1, -2])
 
     def get_opportunity(self, data):
-        achat = self._get_opportunity(data)
-        print(achat)
-        return achat
+        # print(achat)
+        return self._get_opportunity(data)
 
     def visu_data(self, dfi):
         df = self._prepa_visu_or_opportunity(dfi)
