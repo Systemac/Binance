@@ -38,7 +38,17 @@ class BinanceAPI:
         return math.trunc(stepper * number) / stepper
 
     def follow(self, asset):
-        pass  # TODO: script de suivi de la monnaie
+        while True:
+            # TODO : test a savoir si on a deja la possibilité de vendre et si il n'y a pas d'ordre en cours
+            orders = self.get_open_orders(asset)
+            price_order = 0
+            if orders:
+                price_order = float(orders[0]['price'])
+                print(price_order)
+            if self.get_opportunity(self.get_klines(asset)):
+                print("Opportunité !!!!!")
+                self.buy_limit(market=asset, quantity=self.calcul_quantity(asset))
+            time.sleep(5)
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -161,8 +171,10 @@ class BinanceAPI:
                         rec = i['filters'][2]['minQty'].find('1') - i['filters'][2]['minQty'].find('.')
                         print(rec)
                         amount = btc_free / float(j['price'])
+                        quantity = self.truncate(amount, rec)
                         print(
-                            f"{i['symbol']}: {i['filters'][2]['minQty']}  {amount} / {self.truncate(amount, rec)}")
+                            f"{i['symbol']}: {i['filters'][2]['minQty']}  {amount} / {quantity}")
+        return quantity
 
     def buy_limit(self, market, quantity, rate):
         path = "%s/order" % self.BASE_URL_V3
@@ -176,6 +188,18 @@ class BinanceAPI:
             'side': 'SELL',
             'type': 'STOP_LOSS',
             'stopPrice': price,
+            'quantity': quantity
+        }
+        return self._post(path, params)
+
+    def stop_limit(self, market, quantity, price):
+        path = "%s/order" % self.BASE_URL_V3
+        params = {
+            'symbol': market,
+            'side': 'SELL',
+            'type': 'LIMIT',
+            "timeInForce": "GTC",
+            'price': price,
             'quantity': quantity
         }
         return self._post(path, params)

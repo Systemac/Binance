@@ -1,5 +1,3 @@
-import time
-
 from binance_api import BinanceAPI
 from config import config
 
@@ -7,21 +5,22 @@ test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windo
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    while True:
-        for i in test.assets:
-            print(i)
-            if test.get_opportunity(test.get_klines(i)):
-                print(f"Opportunité !!!!!!!!!!")
-                break
-            else:
-                print("Pas encore...")
-        time.sleep(3)
+    # test.follow("LINKBTC")
 
+    # while True:
+    #     for i in test.assets:
+    #         print(i)
+    #         if test.get_opportunity(test.get_klines(i)):
+    #             print(f"Opportunité !!!!!!!!!!")
+    #             break
+    #         else:
+    #             print("Pas encore...")
+    #     time.sleep(3)
     # for _ in test.assets:
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
-    # test.calcul_quantity('ETHBTC')
+    test.calcul_quantity('ETHBTC')
     # for i in test.assets:
     #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))
