@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
-    test.calcul_quantity('ETHBTC')
+    print(test.get_my_trades('LINKBTC', 1))
     # for i in test.assets:
     #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))
