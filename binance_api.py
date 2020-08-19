@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import requests
 
+from websocket_api import WSClient
+
 try:
     from urllib import urlencode
 # python3
@@ -27,9 +29,9 @@ class BinanceAPI:
         self.recv_windows = recv_windows
         self.portfolio = {}
         self.assets = []
+        self.products = self.get_products()
         self.get_portfolio()
         self.get_assets_to_follow()
-        self.products = self.get_products()
 
     def truncate(self, number, digits) -> float:
         if digits < 0:
@@ -45,10 +47,23 @@ class BinanceAPI:
             if orders:
                 price_order = float(orders[0]['price'])
                 print(price_order)
+                t = WSClient(open_price=price_order, symbol=asset)
+                t.start()
+                while t.is_alive():
+                    time.sleep(0.1)
+                orders = self.get_open_orders(asset)
+                if orders:
+                    self.stop_limit(market=asset, quantity=self.calcul_quantity(asset), price=price_order * 1.02)
             if self.get_opportunity(self.get_klines(asset)):
                 print("Opportunité !!!!!")
                 self.buy_limit(market=asset, quantity=self.calcul_quantity(asset))
-            time.sleep(5)
+                p_open = float(self.get_my_trades(asset, 1)[0]['price'])
+                t = WSClient(open_price=p_open, symbol=asset)
+                t.start()
+                while t.is_alive():
+                    time.sleep(0.1)
+                self.stop_limit(market=asset, quantity=self.calcul_quantity(asset), price=p_open * 1.02)
+            time.sleep(1)
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -99,9 +114,18 @@ class BinanceAPI:
 
     def get_assets_to_follow(self):
         i = self.portfolio
+        # print(i)
         for j in i:
             if i[j]['locked'] != 0:
                 self.assets.append(f"{j}BTC")
+            elif i[j]['free'] != 0:
+                for k in self.products['symbols']:
+                    if k['symbol'] == f"{j}BTC":
+                        print(f"{j}BTC: {k['filters'][2]['minQty']} {i[j]['free']}")
+                        if float(k['filters'][2]['minQty']) < i[j]['free']:
+                            print("OK")
+                        else:
+                            print("KO")
         l = self.get_sorted_symbol_by_volume()
         k = 0
         while len(self.assets) < 7:

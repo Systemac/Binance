@@ -9,13 +9,12 @@ class WSClient(threading.Thread):
     wsc = None
     stop = False
 
-    def __init__(self, symbol, open_price, target_price):
+    def __init__(self, symbol, open_price):
 
         self.symbol = symbol
         threading.Thread.__init__(self)
         self.first_price = open_price
         self.price = 0
-        self.target_price = target_price
 
     def __shortcuts__(self, key):
 
@@ -58,9 +57,8 @@ class WSClient(threading.Thread):
 
         test = json.loads(message)
         self.price = float(test['p'])
-        if self.price > self.first_price * 1.03:
+        if self.price > self.first_price * 1.03 and self.price == self.first_price:
             self.stop_client()
-        # TODO : generer le prix en local pour l'objet qui contiendra le symbol uniquement.
 
     def stop_client(self):
         self.stop = True
