@@ -57,7 +57,8 @@ class WSClient(threading.Thread):
 
         test = json.loads(message)
         self.price = float(test['p'])
-        if self.price > self.first_price * 1.03 and self.price == self.first_price:
+        if self.price > self.first_price * 1.02 or self.price == self.first_price:
+            print(f"{self.symbol} : {self.first_price} : {self.price}")
             self.stop_client()
 
     def stop_client(self):
