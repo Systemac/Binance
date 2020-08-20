@@ -1,11 +1,11 @@
+import datetime
 import hashlib
 import hmac
 import math
-import time
-import datetime
 import random
-import decimal
 import sys
+import time
+
 import mplfinance as mpf
 import numpy as np
 import pandas as pd
@@ -61,7 +61,7 @@ class BinanceAPI:
                                     while True:
                                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
                                             self.follow(asset)
-                                            t.stop_client()
+                                            t.stop_client()  # TODO : lancer un post sur le websocket au lieu du sys exit
                                             sys.exit(0)
                                         elif not t.is_alive():
                                             break
