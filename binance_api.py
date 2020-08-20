@@ -45,29 +45,31 @@ class BinanceAPI:
             orders = self.get_open_orders(asset)
             price_order = 0
             for j in self.portfolio:
-                if self.portfolio[j]['free'] != 0:
-                    for k in self.products['symbols']:
-                        if k['symbol'] == f"{j}BTC":
-                            if float(k['filters'][2]['minQty']) < float(self.portfolio[j]['free']):
-                                print(f"{j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
-                                # print("OK")
-                                # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
-                                t = WSClient(open_price=float(self.get_my_trades(asset)[0]['price']), symbol=asset)
-                                t.start()
-                                while t.is_alive():
-                                    # print(f"{asset} : ok")
-                                    time.sleep(0.1)
-                                print(f"Sortie de boucle pour {asset}")
-                                orders = self.get_open_orders(asset)
-                                print(orders)
-                                if len(orders) != 0:
-                                    price_order = float(orders[0]['price'])
-                                    print(self.stop_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                          price=self.calcul_precision_price(asset, price_order * 1.01)))
-                                else:
-                                    p_open = float(self.get_my_trades(asset, 1)[0]['price'])
-                                    print(self.stop_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                          price=self.calcul_precision_price(asset, p_open * 1.01)))
+                if j == asset:
+                    if self.portfolio[j]['free'] != 0:
+                        for k in self.products['symbols']:
+                            if k['symbol'] == f"{j}BTC":
+                                if float(k['filters'][2]['minQty']) < float(self.portfolio[j]['free']):
+                                    print(f"{j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
+                                    # print("OK")
+                                    # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
+                                    t = WSClient(open_price=float(self.get_my_trades(asset)[0]['price']), symbol=asset)
+                                    t.start()
+                                    while t.is_alive():
+                                        # print(f"{asset} : ok")
+                                        time.sleep(0.1)
+                                    print(f"Sortie de boucle pour {asset}")
+                                    orders = self.get_open_orders(asset)
+                                    print(orders)
+                                    if len(orders) != 0:
+                                        price_order = float(orders[0]['price'])
+                                        print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
+                                                             price=self.calcul_precision_price(asset,
+                                                                                               price_order * 1.01)))
+                                    else:
+                                        p_open = float(self.get_my_trades(asset)[-1]['price'])
+                                        print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
+                                                             price=self.calcul_precision_price(asset, p_open * 1.01)))
             if orders:
                 price_order = float(orders[0]['price'])
                 print(price_order)

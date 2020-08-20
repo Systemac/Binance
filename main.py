@@ -7,6 +7,7 @@ test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windo
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    # print(test.get_my_trades("LINKBTC")[-1])
     # test.calcul_quantity_sell("LINKBTC")
     # test.follow("LINKBTC")
     # while True:
