@@ -58,12 +58,13 @@ class BinanceAPI:
                                     t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
                                     t.start()
                                     _now = datetime.datetime.now()
-                                    while t.is_alive():
-                                        # print(f"{asset} : ok")
+                                    while True:
                                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
                                             self.follow(asset)
                                             t.stop_client()
                                             sys.exit(0)
+                                        elif not t.is_alive():
+                                            break
                                         time.sleep(0.1)
                                     print(f"Sortie de boucle pour {asset}")
                                     orders = self.get_open_orders(asset)
@@ -90,11 +91,13 @@ class BinanceAPI:
                 t = WSClient(open_price=price_order, symbol=asset)
                 t.start()
                 _now = datetime.datetime.now()
-                while t.is_alive():
+                while True:
                     if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
                         self.follow(asset)
                         t.stop_client()
                         sys.exit(0)
+                    elif not t.is_alive():
+                        break
                     time.sleep(0.1)
                 orders = self.get_open_orders(asset)
                 if orders:
@@ -107,11 +110,13 @@ class BinanceAPI:
                 t = WSClient(open_price=p_open, symbol=asset)
                 t.start()
                 _now = datetime.datetime.now()
-                while t.is_alive():
+                while True:
                     if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
                         self.follow(asset)
                         t.stop_client()
                         sys.exit(0)
+                    elif not t.is_alive():
+                        break
                     time.sleep(0.1)
                 print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
                                            price=self.calcul_precision_price(asset, price_order),
@@ -183,7 +188,7 @@ class BinanceAPI:
                             print("KO")
         l = self.get_sorted_symbol_by_volume()
         k = 0
-        while len(self.assets) < 7:
+        while len(self.assets) < 4:
             if l[k][0] not in self.assets:
                 self.assets.append(l[k][0])
             k += 1
