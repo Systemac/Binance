@@ -85,7 +85,7 @@ class BinanceAPI:
             elif self.get_opportunity(self.get_klines(asset)):
                 print(f"Opportunité sur {asset} !!!!!")
                 self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                p_open = float(self.get_my_trades(asset, 1)[0]['price'])
+                p_open = float(self.get_my_trades(asset)[-1]['price'])
                 t = WSClient(open_price=p_open, symbol=asset)
                 t.start()
                 while t.is_alive():
