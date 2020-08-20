@@ -3,6 +3,7 @@ import hmac
 import math
 import time
 from datetime import datetime
+import random
 
 import mplfinance as mpf
 import numpy as np
@@ -41,10 +42,11 @@ class BinanceAPI:
 
     def follow(self, asset):
         while True:
+            # print(f"Début suivi sur {asset}")
             orders = self.get_open_orders(asset)
             price_order = 0
             for j in self.portfolio:
-                if j == asset:
+                if j == asset[:-3]:
                     if self.portfolio[j]['free'] != 0:
                         for k in self.products['symbols']:
                             if k['symbol'] == f"{j}BTC":
@@ -52,7 +54,7 @@ class BinanceAPI:
                                     print(f"{j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
                                     # print("OK")
                                     # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
-                                    t = WSClient(open_price=float(self.get_my_trades(asset)[0]['price']), symbol=asset)
+                                    t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
                                     t.start()
                                     while t.is_alive():
                                         # print(f"{asset} : ok")
@@ -61,14 +63,22 @@ class BinanceAPI:
                                     orders = self.get_open_orders(asset)
                                     print(orders)
                                     if len(orders) != 0:
-                                        price_order = float(orders[0]['price'])
+                                        _order = self.get_prices()
+                                        for _ in _order:
+                                            if _['symbol'] == asset:
+                                                price_order = float(_['price'])
+                                        order_id = orders[0]['orderId']
+                                        self.cancel(asset, order_id)
                                         print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
                                                              price=self.calcul_precision_price(asset,
-                                                                                               price_order * 1.01)))
+                                                                                               price_order * 0,99)))
                                     else:
-                                        p_open = float(self.get_my_trades(asset)[-1]['price'])
-                                        print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
-                                                             price=self.calcul_precision_price(asset, p_open * 1.01)))
+                                        _order = self.get_prices()
+                                        for _ in _order:
+                                            if _['symbol'] == asset:
+                                                price_order = float(_['price'])
+                                        print(self.stop_limit(market=asset, quantity=self.calcul_quantity(asset),
+                                                             price=self.calcul_precision_price(asset, price_order * 0,99)))
                                     self.get_portfolio()
             if orders:
                 price_order = float(orders[0]['price'])
@@ -79,7 +89,7 @@ class BinanceAPI:
                     time.sleep(0.1)
                 orders = self.get_open_orders(asset)
                 if orders:
-                    print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
+                    print(self.stop_limit(market=asset, quantity=self.calcul_quantity(asset),
                                          price=self.calcul_precision_price(asset, price_order * 1.01)))
                     self.get_portfolio()
             elif self.get_opportunity(self.get_klines(asset)):
@@ -90,10 +100,10 @@ class BinanceAPI:
                 t.start()
                 while t.is_alive():
                     time.sleep(0.1)
-                print(self.stop_loss(market=asset, quantity=self.calcul_quantity_sell(asset),
+                print(self.stop_limit(market=asset, quantity=self.calcul_quantity_sell(asset),
                                      price=self.calcul_precision_price(asset, p_open * 1.01)))
                 self.get_portfolio()
-            time.sleep(15)
+            time.sleep(random.randint(10, 30))
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -154,6 +164,7 @@ class BinanceAPI:
                         print(f"{j}BTC: {k['filters'][2]['minQty']} {i[j]['free']}")
                         if float(k['filters'][2]['minQty']) < i[j]['free']:
                             print("OK")
+                            self.assets.append(f"{j}BTC")
                         else:
                             print("KO")
         l = self.get_sorted_symbol_by_volume()
