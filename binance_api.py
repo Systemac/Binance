@@ -41,7 +41,6 @@ class BinanceAPI:
 
     def follow(self, asset):
         while True:
-            # TODO : test a savoir si on a deja la possibilité de vendre et si il n'y a pas d'ordre en cours
             orders = self.get_open_orders(asset)
             price_order = 0
             for j in self.portfolio:
@@ -70,6 +69,7 @@ class BinanceAPI:
                                         p_open = float(self.get_my_trades(asset)[-1]['price'])
                                         print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
                                                              price=self.calcul_precision_price(asset, p_open * 1.01)))
+                                    self.get_portfolio()
             if orders:
                 price_order = float(orders[0]['price'])
                 print(price_order)
@@ -81,6 +81,7 @@ class BinanceAPI:
                 if orders:
                     print(self.stop_loss(market=asset, quantity=self.calcul_quantity(asset),
                                          price=self.calcul_precision_price(asset, price_order * 1.01)))
+                    self.get_portfolio()
             elif self.get_opportunity(self.get_klines(asset)):
                 print(f"Opportunité sur {asset} !!!!!")
                 self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
@@ -91,7 +92,8 @@ class BinanceAPI:
                     time.sleep(0.1)
                 print(self.stop_loss(market=asset, quantity=self.calcul_quantity_sell(asset),
                                      price=self.calcul_precision_price(asset, p_open * 1.01)))
-            time.sleep(3)
+                self.get_portfolio()
+            time.sleep(15)
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -236,7 +238,6 @@ class BinanceAPI:
                 rec = _['filters'][2]['minQty'].find('1') - _['filters'][2]['minQty'].find('.')
                 quantity = self.truncate(amount, rec)
                 # print(f"{minqty}, {amount}, {quantity}")
-                # TODO : Calculer aussi le prix en fonction de la précision ;)
         return quantity
 
     def calcul_precision_price(self, asset, price):
