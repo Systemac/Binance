@@ -1,6 +1,7 @@
 import json
 import threading
 import time
+import datetime
 
 import websocket
 
@@ -36,6 +37,7 @@ class WSClient(threading.Thread):
 
         wsc_url = f"wss://stream.binance.com:9443/ws/{self.symbol.lower()}@trade"
         # websocket.enableTrace(True)
+        _now = datetime.datetime.now()
         self.wsc = websocket.WebSocketApp(wsc_url,
                                           on_message=self.on_message,
                                           on_error=self.on_error)
