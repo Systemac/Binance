@@ -4,6 +4,7 @@ import math
 import time
 import datetime
 import random
+import decimal
 import sys
 import mplfinance as mpf
 import numpy as np
@@ -74,19 +75,14 @@ class BinanceAPI:
                                                 price_order = float(_['price'])
                                         order_id = orders[0]['orderId']
                                         self.cancel(asset, order_id)
-                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                             price=self.calcul_precision_price(asset, price_order * 0.999), stop_price=self.calcul_precision_price(asset, price_order * 0.99)))
+                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),stop_price=self.calcul_precision_price(asset,price_order),price=self.calcul_precision_price(asset,price_order * 0.98)))
                                     else:
                                         _order = self.get_prices()
                                         for _ in _order:
                                             if _['symbol'] == asset:
                                                 price_order = float(_['price'])
                                         print("Pas d'ordre")
-                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                                   price=self.calcul_precision_price(asset,
-                                                                                                     price_order * 0.999),
-                                                                   stop_price=self.calcul_precision_price(asset,
-                                                                                                          price_order * 0.99)))
+                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),stop_price=self.calcul_precision_price(asset,price_order),price=self.calcul_precision_price(asset,price_order * 0.98)))
                                     self.get_portfolio()
             if orders:
                 price_order = float(orders[0]['price'])
@@ -102,9 +98,7 @@ class BinanceAPI:
                     time.sleep(0.1)
                 orders = self.get_open_orders(asset)
                 if orders:
-                    print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                               price=self.calcul_precision_price(asset, price_order * 0.999),
-                                               stop_price=self.calcul_precision_price(asset, price_order * 0.99)))
+                    print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),stop_price=self.calcul_precision_price(asset,price_order),price=self.calcul_precision_price(asset,price_order * 0.98)))
                     self.get_portfolio()
             elif self.get_opportunity(self.get_klines(asset)):
                 print(f"Opportunité sur {asset} !!!!!")
@@ -120,7 +114,7 @@ class BinanceAPI:
                         sys.exit(0)
                     time.sleep(0.1)
                 print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                           price=self.calcul_precision_price(asset, price_order * 0.999),
+                                           price=self.calcul_precision_price(asset, price_order),
                                            stop_price=self.calcul_precision_price(asset, price_order * 0.99)))
                 self.get_portfolio()
             time.sleep(random.randint(10, 30))
@@ -274,9 +268,9 @@ class BinanceAPI:
     def calcul_precision_price(self, asset, price):
         for _ in self.products['symbols']:
             if _['symbol'] == asset:
-                precision = float(_['quotePrecision'])
-                print(f"{precision}")
+                precision = int(_['quotePrecision'])
                 true_price = self.truncate(price, precision)
+                print(f"true price {true_price}")
         return true_price
 
     def buy_limit(self, market, quantity, rate):
