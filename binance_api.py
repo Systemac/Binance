@@ -287,7 +287,7 @@ class BinanceAPI:
     def calcul_precision_price(self, asset, price):
         for _ in self.products['symbols']:
             if _['symbol'] == asset:
-                precision = int(_['quotePrecision'])
+                precision = int(_['baseAssetPrecision'])
                 true_price = self.truncate(price, precision)
                 print(f"true price {true_price}")
         return true_price
