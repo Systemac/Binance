@@ -42,7 +42,10 @@ class BinanceAPI:
         return math.trunc(stepper * number) / stepper
 
     def follow(self, asset):
+        _nowt = datetime.datetime.now()
         while True:
+            if datetime.datetime.now() > _nowt + datetime.timedelta(seconds=10):
+                break
             # print(f"Début suivi sur {asset}")
             orders = self.get_open_orders(asset)
             price_order = 0
@@ -52,18 +55,18 @@ class BinanceAPI:
                         for k in self.products['symbols']:
                             if k['symbol'] == f"{j}BTC":
                                 if float(k['filters'][2]['minQty']) < float(self.portfolio[j]['free']):
-                                    print(f"{j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
+                                    print(
+                                        f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
                                     # print("OK")
                                     # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
                                     t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
                                     t.start()
-                                    _now = datetime.datetime.now()
+                                    _now1 = datetime.datetime.now()
                                     while True:
-                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
-                                            self.follow(asset)
+                                        if datetime.datetime.now() > _now1 + datetime.timedelta(seconds=10):
+                                            # self.follow(asset)
                                             t.stop_client()  # TODO : lancer un post sur le websocket au lieu du sys exit
-                                            sys.exit(0)
-                                        elif not t.is_alive():
+                                            # sys.exit(0)
                                             break
                                         time.sleep(0.1)
                                     print(f"Sortie de boucle pour {asset}")
@@ -94,15 +97,16 @@ class BinanceAPI:
             if orders:
                 price_order = float(orders[0]['price'])
                 price_order = self.calcul_precision_price(asset, price_order)
-                print(price_order)
+                print(f"Ordre en cours sur {asset} à {price_order}")
                 t = WSClient(open_price=price_order, symbol=asset)
                 t.start()
                 _now = datetime.datetime.now()
                 while True:
-                    if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
-                        self.follow(asset)
+                    if datetime.datetime.now() > _now + datetime.timedelta(seconds=10):
+                        # self.follow(asset)
                         t.stop_client()
-                        sys.exit(0)
+                        # sys.exit(0)
+                        break
                     elif not t.is_alive():
                         break
                     time.sleep(0.1)
@@ -120,10 +124,11 @@ class BinanceAPI:
                 t.start()
                 _now = datetime.datetime.now()
                 while True:
-                    if datetime.datetime.now() > _now + datetime.timedelta(minutes=30):
-                        self.follow(asset)
+                    if datetime.datetime.now() > _now + datetime.timedelta(seconds=10):
+                        # self.follow(asset)
                         t.stop_client()
-                        sys.exit(0)
+                        # sys.exit(0)
+                        break
                     elif not t.is_alive():
                         break
                     time.sleep(0.1)
@@ -137,6 +142,7 @@ class BinanceAPI:
                                            stop_price=float(price_order * 0.99)))
                 self.get_portfolio()
             time.sleep(random.randint(10, 30))
+        print(f"Fin de boucle sur {asset}")
 
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
@@ -206,6 +212,7 @@ class BinanceAPI:
             if l[k][0] not in self.assets:
                 self.assets.append(l[k][0])
             k += 1
+        print(self.assets)
 
     def get_sorted_symbol_by_volume(self):
         essai = self.get_prices()
