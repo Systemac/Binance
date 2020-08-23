@@ -3,7 +3,6 @@ import hashlib
 import hmac
 import math
 import random
-import sys
 import time
 
 import mplfinance as mpf
@@ -65,7 +64,7 @@ class BinanceAPI:
                                     while True:
                                         if datetime.datetime.now() > _now1 + datetime.timedelta(seconds=10):
                                             # self.follow(asset)
-                                            t.stop_client()  # TODO : lancer un post sur le websocket au lieu du sys exit
+                                            t.stop_client()  # TODO : mettre ceci en méthode et changer la sortie pour qu'il y ai une codition sur le fait que le prix corresponde ou non à l'attente.
                                             # sys.exit(0)
                                             break
                                         time.sleep(0.1)
