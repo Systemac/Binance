@@ -1,10 +1,7 @@
 import concurrent.futures
-import datetime
-import time
+
 from binance_api import BinanceAPI
 from config import config
-
-test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windows=config.get("recv_windows"))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -25,8 +22,10 @@ if __name__ == '__main__':
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(test.assets)) as executor:
-        results = executor.map(test.follow, test.assets)
+    while True:
+        test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), recv_windows=config.get("recv_windows"))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(test.assets)) as executor:
+            results = executor.map(test.follow, test.assets)
     # for i in test.assets:
     #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))
