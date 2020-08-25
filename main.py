@@ -31,7 +31,6 @@ if __name__ == '__main__':
                 results = executor.map(test.follow, test.assets)
         except:
             time.sleep(30)
-            pass
     # for i in test.assets:
     #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))
