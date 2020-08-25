@@ -67,37 +67,39 @@ class BinanceAPI:
                                             t.stop_client()  # TODO : mettre ceci en méthode et changer la sortie pour qu'il y ai une codition sur le fait que le prix corresponde ou non à l'attente.
                                             # sys.exit(0)
                                             break
+                                        elif not t.is_alive():
+                                            print(f"Sortie de boucle pour {asset}, 2 % atteint !!")
+                                            orders = self.get_open_orders(asset)
+                                            print(orders)
+                                            if len(orders) != 0:
+                                                _order = self.get_prices()
+                                                for _ in _order:
+                                                    if _['symbol'] == asset:
+                                                        price_order = float(_['price'])
+                                                order_id = orders[0]['orderId']
+                                                self.cancel(asset, order_id)
+                                                print(self.stop_loss_limit(market=asset,
+                                                                           quantity=self.calcul_quantity(asset),
+                                                                           price=self.calcul_precision_price(asset,
+                                                                                                             price_order * 0.99),
+                                                                           stop_price=self.calcul_precision_price(asset,
+                                                                                                                  price_order * 0.99)))
+                                            else:
+                                                _order = self.get_prices()
+                                                for _ in _order:
+                                                    if _['symbol'] == asset:
+                                                        price_order = float(_['price'])
+                                                print("Pas d'ordre")
+                                                print(self.stop_loss_limit(market=asset,
+                                                                           quantity=self.calcul_quantity(asset),
+                                                                           price=self.calcul_precision_price(asset,
+                                                                                                             price_order * 0.99),
+                                                                           stop_price=self.calcul_precision_price(asset,
+                                                                                                                  price_order * 0.99)))
                                         time.sleep(0.1)
-                                    print(f"Sortie de boucle pour {asset}")
-                                    orders = self.get_open_orders(asset)
-                                    print(orders)
-                                    if len(orders) != 0:
-                                        _order = self.get_prices()
-                                        for _ in _order:
-                                            if _['symbol'] == asset:
-                                                price_order = float(_['price'])
-                                                price_order = self.calcul_precision_price(asset, price_order)
-                                                price_order = price_order * 0.99
-                                        order_id = orders[0]['orderId']
-                                        self.cancel(asset, order_id)
-                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                                   price=float(price_order),
-                                                                   stop_price=float(price_order)))
-                                    else:
-                                        _order = self.get_prices()
-                                        for _ in _order:
-                                            if _['symbol'] == asset:
-                                                price_order = float(_['price'])
-                                                price_order = self.calcul_precision_price(asset, price_order)
-                                                price_order = price_order * 0.99
-                                        print("Pas d'ordre")
-                                        print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                                   price=float(price_order),
-                                                                   stop_price=float(price_order)))
                                     self.get_portfolio()
             if orders:
                 price_order = float(orders[0]['price'])
-                price_order = self.calcul_precision_price(asset, price_order)
                 print(f"Ordre en cours sur {asset} à {price_order}")
                 t = WSClient(open_price=price_order, symbol=asset)
                 t.start()
@@ -112,8 +114,9 @@ class BinanceAPI:
                         orders = self.get_open_orders(asset)
                         if not orders:
                             print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=float(price_order * 0.99),
-                                                       stop_price=float(price_order * 0.99)))
+                                                       price=self.calcul_precision_price(asset, price_order * 0.99),
+                                                       stop_price=self.calcul_precision_price(asset,
+                                                                                              price_order * 0.99)))
                         else:
                             order_id = orders[0]['orderId']
                             self.cancel(asset, order_id)
@@ -121,15 +124,13 @@ class BinanceAPI:
                             for _ in _order:
                                 if _['symbol'] == asset:
                                     price_order = float(_['price'])
-                                    price_order = self.calcul_precision_price(asset, price_order)
-                                    price_order = price_order * 0.99
                             print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=float(price_order),
-                                                       stop_price=float(price_order)))
+                                                       price=self.calcul_precision_price(asset, price_order * 0.99),
+                                                       stop_price=self.calcul_precision_price(asset,
+                                                                                              price_order * 0.99)))
                         break
                     time.sleep(0.1)
-
-                    self.get_portfolio()
+                self.get_portfolio()
             elif self.get_opportunity(self.get_klines(asset)):
                 print(f"Opportunité sur {asset} !!!!!")
                 self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
@@ -148,10 +149,9 @@ class BinanceAPI:
                         for _ in _order:
                             if _['symbol'] == asset:
                                 price_order = float(_['price'])
-                                price_order = self.calcul_precision_price(asset, price_order)
                         print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                   price=float(price_order * 0.99),
-                                                   stop_price=float(price_order * 0.99)))
+                                                   price=self.calcul_precision_price(asset, price_order * 0.99),
+                                                   stop_price=self.calcul_precision_price(asset, price_order * 0.99)))
                         self.get_portfolio()
                         break
                     time.sleep(0.1)
