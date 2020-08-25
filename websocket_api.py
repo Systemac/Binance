@@ -1,7 +1,7 @@
+import datetime
 import json
 import threading
 import time
-import datetime
 
 import websocket
 
@@ -59,6 +59,7 @@ class WSClient(threading.Thread):
 
         test = json.loads(message)
         self.price = float(test['p'])
+        # print(f"{self.symbol} : {self.first_price} : {self.price}")
         if self.price > self.first_price * 1.02:
             print(f"{self.symbol} : {self.first_price} : {self.price}")
             self.stop_client()
