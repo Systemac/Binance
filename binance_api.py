@@ -90,6 +90,9 @@ class BinanceAPI:
                                                                                                  float(
                                                                                                      self.get_prices_asset(
                                                                                                          asset)) * 0.99)))
+                                    print(f"Fin de boucle pour {asset}.")
+                                    sys.exit(0)
+                                    break
                             time.sleep(0.1)
                         self.get_portfolio()
                 if orders:
