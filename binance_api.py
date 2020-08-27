@@ -87,8 +87,9 @@ class BinanceAPI:
                                     print(self.stop_loss_limit(market=asset,
                                                                quantity=self.calcul_quantity(asset),
                                                                price=self.calcul_precision_price(asset,
-                                                                                                 self.get_prices_asset(
-                                                                                                     asset) * 0.99)))
+                                                                                                 float(
+                                                                                                     self.get_prices_asset(
+                                                                                                         asset)) * 0.99)))
                             time.sleep(0.1)
                         self.get_portfolio()
                 if orders:
@@ -112,8 +113,8 @@ class BinanceAPI:
                             print(self.stop_loss_limit(market=asset,
                                                        quantity=self.calcul_quantity(asset),
                                                        price=self.calcul_precision_price(asset,
-                                                                                         self.get_prices_asset(
-                                                                                             asset) * 0.99)))
+                                                                                         float(self.get_prices_asset(
+                                                                                             asset)) * 0.99)))
                             break
                         time.sleep(0.1)
                     self.get_portfolio()
@@ -134,8 +135,8 @@ class BinanceAPI:
                             print(self.stop_loss_limit(market=asset,
                                                        quantity=self.calcul_quantity(asset),
                                                        price=self.calcul_precision_price(asset,
-                                                                                         self.get_prices_asset(
-                                                                                             asset) * 0.99)))
+                                                                                         float(self.get_prices_asset(
+                                                                                             asset)) * 0.99)))
                             self.get_portfolio()
                             break
                         time.sleep(0.1)
