@@ -64,7 +64,8 @@ class BinanceAPI:
                             while True:
                                 if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
                                     # self.follow(asset)
-                                    t.stop_client()  # TODO : mettre ceci en méthode et changer la sortie pour qu'il y ai une codition sur le fait que le prix corresponde ou non à l'attente.
+                                    t.stop_client()  # TODO : mettre ceci en méthode et changer la sortie pour qu'il y ai une condition sur le fait que le prix corresponde ou non à l'attente.
+                                    print(f"Fin de boucle pour {asset}.")
                                     sys.exit(0)
                                     break
                                 elif not t.is_alive():
@@ -87,9 +88,7 @@ class BinanceAPI:
                                     print(self.stop_loss_limit(market=asset,
                                                                quantity=self.calcul_quantity(asset),
                                                                price=self.calcul_precision_price(asset,
-                                                                                                 price_order * 0.99),
-                                                               stop_price=self.calcul_precision_price(asset,
-                                                                                                      price_order * 0.99)))
+                                                                                                 price_order * 0.99)))
                             time.sleep(0.1)
                         self.get_portfolio()
                 if orders:
@@ -102,6 +101,7 @@ class BinanceAPI:
                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
                             # self.follow(asset)
                             t.stop_client()
+                            print(f"Fin de boucle pour {asset}.")
                             sys.exit(0)
                             break
                         elif not t.is_alive():
@@ -114,9 +114,7 @@ class BinanceAPI:
                                     if _['symbol'] == asset:
                                         price_order = float(_['price'])
                             print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=self.calcul_precision_price(asset, price_order * 0.99),
-                                                       stop_price=self.calcul_precision_price(asset,
-                                                                                              price_order * 0.99)))
+                                                       price=self.calcul_precision_price(asset, price_order * 0.99)))
                             break
                         time.sleep(0.1)
                     self.get_portfolio()
@@ -139,9 +137,7 @@ class BinanceAPI:
                                 if _['symbol'] == asset:
                                     price_order = float(_['price'])
                             print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=self.calcul_precision_price(asset, price_order * 0.99),
-                                                       stop_price=self.calcul_precision_price(asset,
-                                                                                              price_order * 0.99)))
+                                                       price=self.calcul_precision_price(asset, price_order * 0.99)))
                             self.get_portfolio()
                             break
                         time.sleep(0.1)
@@ -331,7 +327,7 @@ class BinanceAPI:
         }
         return self._post(path, params)
 
-    def stop_loss_limit(self, market, quantity, price, stop_price):
+    def stop_loss_limit(self, market, quantity, price):
         path = "%s/order" % self.BASE_URL_V3
         params = {
             'symbol': market,
@@ -339,7 +335,7 @@ class BinanceAPI:
             'type': 'STOP_LOSS_LIMIT',
             "timeInForce": "GTC",
             'price': price,
-            'stopPrice': stop_price,
+            'stopPrice': price,
             'quantity': quantity
         }
         return self._post(path, params)
