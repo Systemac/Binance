@@ -47,7 +47,6 @@ class BinanceAPI:
                 break
             # print(f"Début suivi sur {asset}")
             orders = self.get_open_orders(asset)
-            price_order = 0
             for j in self.portfolio:
                 if j == asset[:-3] and self.portfolio[j]['free'] != 0:
                     for k in self.products['symbols']:
@@ -88,7 +87,8 @@ class BinanceAPI:
                                     print(self.stop_loss_limit(market=asset,
                                                                quantity=self.calcul_quantity(asset),
                                                                price=self.calcul_precision_price(asset,
-                                                                                                 price_order * 0.99)))
+                                                                                                 self.get_prices_asset(
+                                                                                                     asset) * 0.99)))
                             time.sleep(0.1)
                         self.get_portfolio()
                 if orders:
@@ -109,12 +109,11 @@ class BinanceAPI:
                             if orders:
                                 order_id = orders[0]['orderId']
                                 self.cancel(asset, order_id)
-                                _order = self.get_prices()
-                                for _ in _order:
-                                    if _['symbol'] == asset:
-                                        price_order = float(_['price'])
-                            print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=self.calcul_precision_price(asset, price_order * 0.99)))
+                            print(self.stop_loss_limit(market=asset,
+                                                       quantity=self.calcul_quantity(asset),
+                                                       price=self.calcul_precision_price(asset,
+                                                                                         self.get_prices_asset(
+                                                                                             asset) * 0.99)))
                             break
                         time.sleep(0.1)
                     self.get_portfolio()
@@ -132,12 +131,11 @@ class BinanceAPI:
                             sys.exit(0)
                             break
                         elif not t.is_alive():
-                            _order = self.get_prices()
-                            for _ in _order:
-                                if _['symbol'] == asset:
-                                    price_order = float(_['price'])
-                            print(self.stop_loss_limit(market=asset, quantity=self.calcul_quantity(asset),
-                                                       price=self.calcul_precision_price(asset, price_order * 0.99)))
+                            print(self.stop_loss_limit(market=asset,
+                                                       quantity=self.calcul_quantity(asset),
+                                                       price=self.calcul_precision_price(asset,
+                                                                                         self.get_prices_asset(
+                                                                                             asset) * 0.99)))
                             self.get_portfolio()
                             break
                         time.sleep(0.1)
@@ -229,6 +227,11 @@ class BinanceAPI:
     def get_prices(self):
         path = "%s/ticker/price" % self.BASE_URL_V3
         return self._get_no_sign(path)
+
+    def get_prices_asset(self, asset):
+        path = f"{self.BASE_URL_V3}/ticker/price"
+        params = {"symbol": asset}
+        return self._get_no_sign(path, params).get("price")
 
     def get_prices_change(self):
         path = "%s/ticker/24hr" % self.BASE_URL_V3

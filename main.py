@@ -6,6 +6,9 @@ from config import config
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    # test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
+    #                   recv_windows=config.get("recv_windows"))
+    # print((test.get_prices_asset("ETHBTC")))
     # print(test.get_my_trades("LINKBTC")[-1])
     # test.calcul_quantity_sell("LINKBTC")
     # test.follow("LINKBTC")
@@ -23,6 +26,7 @@ if __name__ == '__main__':
     #     _ = WSClient(_)
     #     _.start()
     #     print(_.getName())
+
     while True:
         try:
             test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
