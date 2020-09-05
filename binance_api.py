@@ -25,6 +25,7 @@ class BinanceAPI:
     PUBLIC_URL = "https://www.binance.com/exchange/public/product"
 
     def __init__(self, key, secret, recv_windows):
+        self.time_offset = 0
         self.key = key
         self.secret = secret
         self.recv_windows = recv_windows
@@ -533,9 +534,11 @@ class BinanceAPI:
         return requests.get(url, timeout=30, verify=True, headers=header).json()
 
     def _sign(self, params={}):
+        offset = 0
         data = params.copy()
-
-        ts = int(1000 * time.time())
+        server_time = self.get_server_time()['serverTime']
+        offset = time.time() * 1000 - server_time
+        ts = int(time.time() * 1000 - offset)
         data.update({"timestamp": ts})
         h = urlencode(data)
         b = bytearray()
