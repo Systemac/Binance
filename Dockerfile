@@ -18,4 +18,4 @@ RUN ntpd -qxg
 RUN /etc/init.d/ntp start
 VOLUME /etc/localtime:/etc/localtime:ro
 
-CMD [ "python", "./app/main.py" ]
+CMD [ "python", "/app/main.py" ]
