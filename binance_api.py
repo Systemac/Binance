@@ -26,7 +26,7 @@ class BinanceAPI:
 
     def __init__(self, key, secret, recv_windows):
         self.key = key
-        print(f"key : {self.key}")
+        # print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
         self.portfolio = {}
