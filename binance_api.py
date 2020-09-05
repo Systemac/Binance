@@ -534,7 +534,6 @@ class BinanceAPI:
         return requests.get(url, timeout=30, verify=True, headers=header).json()
 
     def _sign(self, params={}):
-        offset = 0
         data = params.copy()
         server_time = self.get_server_time()['serverTime']
         offset = time.time() * 1000 - server_time
