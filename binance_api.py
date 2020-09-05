@@ -25,8 +25,8 @@ class BinanceAPI:
     PUBLIC_URL = "https://www.binance.com/exchange/public/product"
 
     def __init__(self, key, secret, recv_windows):
-        self.time_offset = 0
         self.key = key
+        print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
         self.portfolio = {}
