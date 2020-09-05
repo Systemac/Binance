@@ -9,4 +9,8 @@ Thanks to yasinkuyu for the basics !! :
 
 https://github.com/yasinkuyu/binance-trader
 
-For docker: it's here : https://hub.docker.com/repository/docker/systemac/trader/general
+For docker: it's here : 
+
+https://hub.docker.com/repository/docker/systemac/trader/general
+
+You just need to create a volume with config.py same as example.
