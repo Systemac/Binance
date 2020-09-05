@@ -1,4 +1,5 @@
 import concurrent.futures
+import sys
 import time
 
 from binance_api import BinanceAPI
@@ -35,7 +36,7 @@ if __name__ == '__main__':
             with concurrent.futures.ThreadPoolExecutor(max_workers=len(test.assets)) as executor:
                 results = executor.map(test.follow, test.assets)
         except:
-            print("erreur...")
+            print(f"erreur {sys.exc_info()[0]}")
             time.sleep(30)
     # for i in test.assets:
     #     test.calcul_quantity(i)
