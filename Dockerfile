@@ -5,7 +5,6 @@ COPY websocket_api.py ./app/
 COPY main.py ./app/
 COPY requirements.txt ./app/
 VOLUME /etc/localtime:/etc/localtime:ro
-VOLUME /your-config:/app/
 RUN pip install --no-cache-dir -r /app/requirements.txt
 RUN apt-get update && apt-get install ntp -y
 RUN sed 's/pool /#pool /g' /etc/ntp.conf > /tmp/ntp.conf.tmp
