@@ -37,7 +37,7 @@ if __name__ == '__main__':
                 results = executor.map(test.follow, test.assets)
         except:
             print(f"erreur {sys.exc_info()[0]}")
-            time.sleep(30)
+            time.sleep(5)
     # for i in test.assets:
     #     test.calcul_quantity(i)
     # print(test.get_my_trades("ETHBTC"))

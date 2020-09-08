@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import math
 import random
+import sys
 import time
 
 import mplfinance as mpf
@@ -32,7 +33,7 @@ class BinanceAPI:
         self.portfolio = {}
         self.assets = []
         self.products = self.get_products()
-        print(self.products)
+        # print(self.products)
         self.get_portfolio()
         print(self.portfolio)
         self.get_assets_to_follow()
@@ -188,13 +189,17 @@ class BinanceAPI:
 
     def get_portfolio(self):
         data = self.get_account()
-        dico = {}
-        for _ in data['balances']:
-            if float(_['free']) != 0:
-                dico[_['asset']] = {
-                    'free': float(_['free']),
-                    'locked': float(_['locked'])}
-        self.portfolio = dico
+        if not data['balances']:
+            print("Erreur...")
+            sys.exit(0)
+        else:
+            dico = {}
+            for _ in data['balances']:
+                if float(_['free']) != 0:
+                    dico[_['asset']] = {
+                        'free': float(_['free']),
+                        'locked': float(_['locked'])}
+            self.portfolio = dico
 
     def get_assets_to_follow(self):
         i = self.portfolio
@@ -553,8 +558,7 @@ class BinanceAPI:
         query = urlencode(self._sign(params))
         url = "%s?%s" % (path, query)
         header = {"X-MBX-APIKEY": self.key}
-        return requests.get(url, headers=header, \
-                            timeout=30, verify=True).json()
+        return requests.get(url, headers=header, timeout=30, verify=True).json()
 
     def _post(self, path, params={}):
         params.update({"recvWindow": self.recv_windows})
