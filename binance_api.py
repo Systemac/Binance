@@ -32,7 +32,9 @@ class BinanceAPI:
         self.portfolio = {}
         self.assets = []
         self.products = self.get_products()
+        print(self.products)
         self.get_portfolio()
+        print(self.portfolio)
         self.get_assets_to_follow()
 
     def truncate(self, number, digits) -> float:
