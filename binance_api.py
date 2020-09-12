@@ -89,7 +89,7 @@ class BinanceAPI:
                                                 price_order = float(_['price'])
                                         print("Pas d'ordre")
                                     print(self.stop_loss_limit(market=asset,
-                                                               quantity=self.calcul_quantity(asset),
+                                                               quantity=self.calcul_quantity_sell(asset),
                                                                price=self.calcul_precision_price(asset,
                                                                                                  float(
                                                                                                      self.get_prices_asset(
@@ -118,7 +118,7 @@ class BinanceAPI:
                                 order_id = orders[0]['orderId']
                                 self.cancel(asset, order_id)
                             print(self.stop_loss_limit(market=asset,
-                                                       quantity=self.calcul_quantity(asset),
+                                                       quantity=self.calcul_quantity_sell(asset),
                                                        price=self.calcul_precision_price(asset,
                                                                                          float(self.get_prices_asset(
                                                                                              asset)) * 0.99)))
@@ -140,7 +140,7 @@ class BinanceAPI:
                             break
                         elif not t.is_alive():
                             print(self.stop_loss_limit(market=asset,
-                                                       quantity=self.calcul_quantity(asset),
+                                                       quantity=self.calcul_quantity_sell(asset),
                                                        price=self.calcul_precision_price(asset,
                                                                                          float(self.get_prices_asset(
                                                                                              asset)) * 0.99)))
