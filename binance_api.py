@@ -61,43 +61,20 @@ class BinanceAPI:
                                 f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
                             # print("OK")
                             # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
-                            t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
-                            t.start()
+                            # t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
+                            # t.start()
                             _now1 = datetime.datetime.now()
                             while True:
                                 if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
                                     # self.follow(asset)
-                                    t.stop_client()  # TODO : mettre ceci en méthode et changer la sortie pour qu'il y ai une condition sur le fait que le prix corresponde ou non à l'attente.
-                                    print(f"Fin de boucle pour {asset}.")
+                                    # t.stop_client()
+                                    # print(f"Fin de boucle pour {asset}.")
                                     sys.exit(0)
                                     break
-                                elif not t.is_alive():
-                                    print(f"Sortie de boucle pour {asset}, 2 % atteint !!")
-                                    orders = self.get_open_orders(asset)
-                                    print(orders)
-                                    if len(orders) != 0:
-                                        _order = self.get_prices()
-                                        for _ in _order:
-                                            if _['symbol'] == asset:
-                                                price_order = float(_['price'])
-                                        order_id = orders[0]['orderId']
-                                        self.cancel(asset, order_id)
-                                    else:
-                                        _order = self.get_prices()
-                                        for _ in _order:
-                                            if _['symbol'] == asset:
-                                                price_order = float(_['price'])
-                                        print("Pas d'ordre")
-                                    print(self.stop_loss_limit(market=asset,
-                                                               quantity=self.calcul_quantity_sell(asset),
-                                                               price=self.calcul_precision_price(asset,
-                                                                                                 float(
-                                                                                                     self.get_prices_asset(
-                                                                                                         asset)) * 0.99)))
-                                    print(f"Fin de boucle pour {asset}.")
-                                    sys.exit(0)
-                                    break
-                            time.sleep(0.1)
+                                if self.get_opportunity_sell(self.get_klines(asset)):
+                                    print(f"Opportunité vente sur {asset} !!!!!")
+                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                            time.sleep(random.randint(10,30))
                         self.get_portfolio()
                 if orders:
                     price_order = float(orders[0]['price'])
@@ -125,28 +102,18 @@ class BinanceAPI:
                             break
                         time.sleep(0.1)
                     self.get_portfolio()
-                elif self.get_opportunity(self.get_klines(asset)):
-                    print(f"Opportunité sur {asset} !!!!!")
+                elif self.get_opportunity_buy(self.get_klines(asset)):
+                    print(f"Opportunité achat sur {asset} !!!!!")
                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                    p_open = float(self.get_my_trades(asset)[-1]['price'])
-                    t = WSClient(open_price=p_open, symbol=asset)
-                    t.start()
                     _now = datetime.datetime.now()
                     while True:
                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
-                            # self.follow(asset)
-                            t.stop_client()
                             sys.exit(0)
                             break
-                        elif not t.is_alive():
-                            print(self.stop_loss_limit(market=asset,
-                                                       quantity=self.calcul_quantity_sell(asset),
-                                                       price=self.calcul_precision_price(asset,
-                                                                                         float(self.get_prices_asset(
-                                                                                             asset)) * 0.99)))
-                            self.get_portfolio()
-                            break
-                        time.sleep(0.1)
+                        if self.get_opportunity_sell(asset):
+                            print(f"Opportunité vente sur {asset} !!!!!")
+                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                        time.sleep(random.randint(10, 30))
                 time.sleep(random.randint(10, 30))
         print(f"Fin de boucle sur {asset}")
 
@@ -277,7 +244,7 @@ class BinanceAPI:
         return self._get(path, params)
 
     def calcul_quantity(self, asset):
-        btc_free = self.portfolio['BTC']['free'] / 3
+        btc_free = self.portfolio['BTC']['free'] / 4
         print(btc_free)
         # print(type(btc_free))
         essai = self.get_prices()
@@ -407,13 +374,21 @@ class BinanceAPI:
         # print(df)
         return df
 
-    def _get_opportunity(self, data):
+    def _get_opportunity_buy(self, data):
         df = self._prepa_visu_or_opportunity(data)
         return not math.isnan(df.iloc[-1, -2])
 
-    def get_opportunity(self, data):
+    def get_opportunity_buy(self, data):
         # print(achat)
-        return self._get_opportunity(data)
+        return self._get_opportunity_buy(data)
+
+    def _get_opportunity_sell(self, data):
+        df = self._prepa_visu_or_opportunity(data)
+        return not math.isnan(df.iloc[-1, -1])
+
+    def get_opportunity_sell(self, data):
+        # print(achat)
+        return self._get_opportunity_sell(data)
 
     def visu_data(self, dfi):
         df = self._prepa_visu_or_opportunity(dfi)

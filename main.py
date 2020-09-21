@@ -50,7 +50,7 @@ if __name__ == '__main__':
     #         liste.append(f"{j}BTC")
     #         print(test.get_open_orders(f"{j}BTC"))
     # print(liste)
-    # essai = test.get_klines("ANKRBTC", interval="5m", delta=200000)
+    # essai = test.get_klines("ETHBTC", interval="5m", delta=200000)
     # test.visu_data(essai)
     # test.get_sorted_symbol_by_volume()
     # for i in test.sorted_btc[:10]:
