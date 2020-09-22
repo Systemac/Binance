@@ -74,6 +74,7 @@ class BinanceAPI:
                                 if self.get_opportunity_sell(self.get_klines(asset)):
                                     print(f"Opportunité vente sur {asset} !!!!!")
                                     self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                    break
                             time.sleep(random.randint(10,30))
                         self.get_portfolio()
                 if orders:
@@ -113,6 +114,7 @@ class BinanceAPI:
                         if self.get_opportunity_sell(asset):
                             print(f"Opportunité vente sur {asset} !!!!!")
                             self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                            break
                         time.sleep(random.randint(10, 30))
                 time.sleep(random.randint(10, 30))
         print(f"Fin de boucle sur {asset}")
