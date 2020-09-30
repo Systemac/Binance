@@ -48,7 +48,6 @@ class BinanceAPI:
             if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=10):
                 break
             # print(f"Début suivi sur {asset}")
-            orders = self.get_open_orders(asset)
             for j in self.portfolio:
                 if j == asset[:-3] and self.portfolio[j]['free'] != 0:
                     for k in self.products['symbols']:
@@ -101,19 +100,20 @@ class BinanceAPI:
                 #             break
                 #         time.sleep(0.1)
                 #     self.get_portfolio()
-                if self.get_opportunity_buy(self.get_klines(asset)):
-                    print(f"Opportunité achat sur {asset} !!!!!")
-                    self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                    _now = datetime.datetime.now()
-                    while True:
-                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
-                            sys.exit(0)
-                            break
-                        if self.get_opportunity_sell(asset):
-                            print(f"Opportunité vente sur {asset} !!!!!")
-                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                            break
-                        time.sleep(random.randint(10, 20))
+                else:
+                    if self.get_opportunity_buy(self.get_klines(asset)):
+                        print(f"Opportunité achat sur {asset} !!!!!")
+                        self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
+                        _now = datetime.datetime.now()
+                        while True:
+                            if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
+                                sys.exit(0)
+                                break
+                            if self.get_opportunity_sell(asset):
+                                print(f"Opportunité vente sur {asset} !!!!!")
+                                self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                break
+                            time.sleep(random.randint(10, 20))
                 time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
 
