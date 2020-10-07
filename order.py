@@ -1,7 +1,7 @@
-from config import config
-
 from BinanceAPI import BinanceAPI
 from Messages import Messages
+
+from config.config import config
 
 # Define Custom import vars
 client = BinanceAPI(config.api_key, config.api_secret)
