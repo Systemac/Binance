@@ -69,7 +69,7 @@ class BinanceAPI:
                                     sys.exit(0)
                                     break
                                 if self.get_opportunity_sell(self.get_klines(asset)):
-                                    if self.get_my_trades(asset)[0]['price'] > self.get_prices_asset(
+                                    if self.get_my_trades(asset)[0]['price'] < self.get_prices_asset(
                                             asset=asset) * 1.015:
                                         print(f"Opportunité vente sur {asset} !!!!!")
                                         self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
