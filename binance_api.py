@@ -68,16 +68,15 @@ class BinanceAPI:
                                     # print(f"Fin de boucle pour {asset}.")
                                     sys.exit(0)
                                     break
-                                if self.get_opportunity_sell(self.get_klines(asset)):
-                                    if self.get_my_trades(asset)[0]['price']:
-                                        if self.get_my_trades(asset)[0]['price'] * 1.015 > self.get_prices_asset(
-                                                asset=asset):
-                                            print(f"Opportunité vente sur {asset} !!!!!")
-                                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                            break
-                                    else:
+                                if self.get_my_trades(asset)[0]['price']:
+                                    if self.get_my_trades(asset)[0]['price'] * 1.015 > self.get_prices_asset(
+                                            asset=asset):
+                                        print(f"Opportunité vente sur {asset} !!!!!")
                                         self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
                                         break
+                                elif self.get_opportunity_sell(self.get_klines(asset)):
+                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                    break
                             time.sleep(random.randint(10, 20))
                         self.get_portfolio()
                 # if orders:
