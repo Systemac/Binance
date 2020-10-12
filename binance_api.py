@@ -56,16 +56,9 @@ class BinanceAPI:
                         ) < float(self.portfolio[j]['free']):
                             print(
                                 f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
-                            # print("OK")
-                            # print(f"{asset} : {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
-                            # t = WSClient(open_price=float(self.get_my_trades(asset)[-1]['price']), symbol=asset)
-                            # t.start()
                             _now1 = datetime.datetime.now()
                             while True:
                                 if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
-                                    # self.follow(asset)
-                                    # t.stop_client()
-                                    # print(f"Fin de boucle pour {asset}.")
                                     sys.exit(0)
                                     break
                                 if self.get_my_trades(asset)[0]['price']:
@@ -74,9 +67,10 @@ class BinanceAPI:
                                         print(f"Opportunité vente sur {asset} !!!!!")
                                         self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
                                         break
-                                elif self.get_opportunity_sell(self.get_klines(asset)):
-                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                    break
+                                else:
+                                    if self.get_opportunity_sell(self.get_klines(asset)):
+                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                        break
                             time.sleep(random.randint(10, 20))
                             self.get_portfolio()
                         else:
