@@ -158,10 +158,11 @@ class BinanceAPI:
                             print("KO")
         l = self.get_sorted_symbol_by_volume()
         k = 0
-        while len(self.assets) < 5:
-            if l[k][0] not in self.assets:
-                self.assets.append(l[k][0])
-            k += 1
+        if len(self.assets) < 6:
+            while len(self.assets) < 6:
+                if l[k][0] not in self.assets:
+                    self.assets.append(l[k][0])
+                k += 1
         print(self.assets)
 
     def get_sorted_symbol_by_volume(self):
