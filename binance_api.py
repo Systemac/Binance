@@ -73,7 +73,6 @@ class BinanceAPI:
                                             self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
                                             break
                                     time.sleep(random.randint(10, 20))
-
                             else:
                                 if self.get_opportunity_buy(self.get_klines(asset)):
                                     print(f"Opportunité achat sur {asset} !!!!!")
