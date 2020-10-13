@@ -62,7 +62,6 @@ class BinanceAPI:
                                 while True:
                                     if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
                                         sys.exit(0)
-                                        break
                                     if self.get_my_trades(asset)[0]['price']:
                                         if self.get_my_trades(asset)[0]['price'] * 1.015 > self.get_prices_asset(
                                                 asset=asset):
@@ -83,7 +82,6 @@ class BinanceAPI:
                                     while True:
                                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
                                             sys.exit(0)
-                                            break
                                         if self.get_opportunity_sell(asset):
                                             print(f"Opportunité vente sur {asset} !!!!!")
                                             self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
@@ -221,7 +219,7 @@ class BinanceAPI:
     def calcul_quantity(self, asset):
         btc_free = self.portfolio['BTC']['free'] / 4
         print(btc_free)
-        # print(type(btc_free))
+        quantity = 0.
         essai = self.get_prices()
         # ca doit donc etre un multiple de ca
         for i in self.products['symbols']:
@@ -239,6 +237,7 @@ class BinanceAPI:
         return quantity
 
     def calcul_quantity_sell(self, asset):
+        quantity = 0.
         for _ in self.products['symbols']:
             if _['symbol'] == asset:
                 minqty = float(_['filters'][2]['minQty'])
@@ -249,6 +248,7 @@ class BinanceAPI:
         return quantity
 
     def calcul_precision_price(self, asset, price):
+        true_price = 0.
         for _ in self.products['symbols']:
             if _['symbol'] == asset:
                 precision = int(_['baseAssetPrecision'])
