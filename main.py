@@ -33,7 +33,7 @@ if __name__ == '__main__':
         try:
             test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
                               recv_windows=config.get("recv_windows"))
-            with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+            with concurrent.futures.ThreadPoolExecutor(len(test.assets)) as executor:
                 results = executor.map(test.follow, test.assets)
         except:
             print(f"erreur {sys.exc_info()[0]}")
