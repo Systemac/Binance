@@ -48,45 +48,48 @@ class BinanceAPI:
             if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=10):
                 break
             # print(f"Début suivi sur {asset}")
-            for j in self.portfolio:
+            i = self.portfolio
+            for j in i:
                 if j == asset[:-3] and self.portfolio[j]['free'] != 0:
                     for k in self.products['symbols']:
-                        if k['symbol'] == f"{j}BTC" and float(
-                                k['filters'][2]['minQty']
-                        ) < float(self.portfolio[j]['free']):
-                            print(
-                                f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
-                            _now1 = datetime.datetime.now()
-                            while True:
-                                if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
-                                    sys.exit(0)
-                                    break
-                                if self.get_my_trades(asset)[0]['price']:
-                                    if self.get_my_trades(asset)[0]['price'] * 1.015 > self.get_prices_asset(
-                                            asset=asset):
-                                        print(f"Opportunité vente sur {asset} !!!!!")
-                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                        break
-                                else:
-                                    if self.get_opportunity_sell(self.get_klines(asset)):
-                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                        break
-                            time.sleep(random.randint(10, 20))
-                            self.get_portfolio()
-                        else:
-                            if self.get_opportunity_buy(self.get_klines(asset)):
-                                print(f"Opportunité achat sur {asset} !!!!!")
-                                self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                                _now = datetime.datetime.now()
+                        # print(f"k : {k}")
+                        if k['symbol'] == asset:
+                            # print(f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[j]['free']}")
+                            if float(k['filters'][2]['minQty']) < float(i[j]['free']):
+                                print(
+                                    f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
+                                _now1 = datetime.datetime.now()
                                 while True:
-                                    if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
+                                    if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
                                         sys.exit(0)
                                         break
-                                    if self.get_opportunity_sell(asset):
-                                        print(f"Opportunité vente sur {asset} !!!!!")
-                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                        break
+                                    if self.get_my_trades(asset)[0]['price']:
+                                        if self.get_my_trades(asset)[0]['price'] * 1.015 > self.get_prices_asset(
+                                                asset=asset):
+                                            print(f"Opportunité vente sur {asset} !!!!!")
+                                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                            break
+                                    else:
+                                        if self.get_opportunity_sell(self.get_klines(asset)):
+                                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                            break
                                     time.sleep(random.randint(10, 20))
+                                self.get_portfolio()
+                            else:
+                                if self.get_opportunity_buy(self.get_klines(asset)):
+                                    print(f"Opportunité achat sur {asset} !!!!!")
+                                    self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
+                                    _now = datetime.datetime.now()
+                                    while True:
+                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
+                                            sys.exit(0)
+                                            break
+                                        if self.get_opportunity_sell(asset):
+                                            print(f"Opportunité vente sur {asset} !!!!!")
+                                            self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                            break
+                                        time.sleep(random.randint(10, 20))
+            time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
 
     def ping(self):
