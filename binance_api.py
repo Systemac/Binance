@@ -23,8 +23,9 @@ class BinanceAPI:
     BASE_URL_V3 = "https://api.binance.com/api/v3"
     PUBLIC_URL = "https://www.binance.com/exchange/public/product"
 
-    def __init__(self, key, secret, recv_windows):
+    def __init__(self, key, secret, recv_windows, loop_time):
         self.key = key
+        self.loop_time = loop_time
         # print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
@@ -45,7 +46,7 @@ class BinanceAPI:
     def follow(self, asset):
         _nowt = datetime.datetime.now()
         while True:
-            if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=5):
+            if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=self.loop_time):
                 break
             # print(f"Début suivi sur {asset}")
             i = self.portfolio
@@ -60,7 +61,7 @@ class BinanceAPI:
                                     f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
                                 _now1 = datetime.datetime.now()
                                 while True:
-                                    if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=5):
+                                    if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=self.loop_time):
                                         sys.exit(0)
                                     if self.get_my_trades(asset)[0]['price']:
                                         if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
@@ -79,7 +80,7 @@ class BinanceAPI:
                                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
                                     _now = datetime.datetime.now()
                                     while True:
-                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=5):
+                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=self.loop_time):
                                             sys.exit(0)
                                         if self.get_my_trades(asset)[0]['price']:
                                             if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
