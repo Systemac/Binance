@@ -45,7 +45,7 @@ class BinanceAPI:
     def follow(self, asset):
         _nowt = datetime.datetime.now()
         while True:
-            if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=10):
+            if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=5):
                 break
             # print(f"Début suivi sur {asset}")
             i = self.portfolio
@@ -60,7 +60,7 @@ class BinanceAPI:
                                     f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
                                 _now1 = datetime.datetime.now()
                                 while True:
-                                    if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
+                                    if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=5):
                                         sys.exit(0)
                                     if self.get_my_trades(asset)[0]['price']:
                                         if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
@@ -79,7 +79,7 @@ class BinanceAPI:
                                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
                                     _now = datetime.datetime.now()
                                     while True:
-                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
+                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=5):
                                             sys.exit(0)
                                         if self.get_my_trades(asset)[0]['price']:
                                             if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
