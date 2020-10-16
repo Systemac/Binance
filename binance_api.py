@@ -63,7 +63,7 @@ class BinanceAPI:
                                     if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=10):
                                         sys.exit(0)
                                     if self.get_my_trades(asset)[0]['price']:
-                                        if float(self.get_my_trades(asset)[0]['price']) * 1.015 > float(
+                                        if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
                                                 self.get_prices_asset(asset=asset)):
                                             print(f"Opportunité vente sur {asset} !!!!!")
                                             self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
@@ -82,7 +82,7 @@ class BinanceAPI:
                                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=10):
                                             sys.exit(0)
                                         if self.get_my_trades(asset)[0]['price']:
-                                            if float(self.get_my_trades(asset)[0]['price']) * 1.015 > float(
+                                            if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
                                                     self.get_prices_asset(asset=asset)):
                                                 print(f"Opportunité vente sur {asset} !!!!!")
                                                 self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
