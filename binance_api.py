@@ -23,9 +23,11 @@ class BinanceAPI:
     BASE_URL_V3 = "https://api.binance.com/api/v3"
     PUBLIC_URL = "https://www.binance.com/exchange/public/product"
 
-    def __init__(self, key, secret, recv_windows, loop_time):
+    def __init__(self, key, secret, recv_windows, percent, loop_time):
         self.key = key
         self.loop_time = loop_time
+        self.percent = 1 + (percent / 100)
+        print(self.percent)
         # print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
@@ -51,11 +53,13 @@ class BinanceAPI:
             # print(f"Début suivi sur {asset}")
             i = self.portfolio
             for j in i:
+                # print(f"j : {j}, asset : {asset}")
                 if j == asset[:-3] and self.portfolio[j]['free'] != 0:
                     for k in self.products['symbols']:
-                        # print(f"k : {k}")
+                        print(f"k : {k}")
                         if k['symbol'] == asset:
-                            # print(f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[j]['free']}")
+                            print(
+                                f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[j]['free']}")
                             if float(k['filters'][2]['minQty']) < float(i[j]['free']):
                                 print(
                                     f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
@@ -64,7 +68,7 @@ class BinanceAPI:
                                     if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=self.loop_time):
                                         sys.exit(0)
                                     if self.get_my_trades(asset)[0]['price']:
-                                        if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
+                                        if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
                                                 self.get_prices_asset(asset=asset)):
                                             print(f"Opportunité vente sur {asset} !!!!!")
                                             self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
@@ -75,6 +79,7 @@ class BinanceAPI:
                                             break
                                     time.sleep(random.randint(10, 20))
                             else:
+                                print(f'le else : {asset}')
                                 if self.get_opportunity_buy(self.get_klines(asset)):
                                     print(f"Opportunité achat sur {asset} !!!!!")
                                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
@@ -83,7 +88,7 @@ class BinanceAPI:
                                         if datetime.datetime.now() > _now + datetime.timedelta(minutes=self.loop_time):
                                             sys.exit(0)
                                         if self.get_my_trades(asset)[0]['price']:
-                                            if float(self.get_my_trades(asset)[0]['price']) * 1.018 > float(
+                                            if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
                                                     self.get_prices_asset(asset=asset)):
                                                 print(f"Opportunité vente sur {asset} !!!!!")
                                                 self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
@@ -94,6 +99,26 @@ class BinanceAPI:
                                                 break
                                         time.sleep(random.randint(10, 20))
                             self.get_portfolio()
+                else:
+                    print(f'le else : {asset}')
+                    if self.get_opportunity_buy(self.get_klines(asset)):
+                        print(f"Opportunité achat sur {asset} !!!!!")
+                        self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
+                        _now5 = datetime.datetime.now()
+                        while True:
+                            if datetime.datetime.now() > _now5 + datetime.timedelta(minutes=self.loop_time):
+                                sys.exit(0)
+                            if self.get_my_trades(asset)[0]['price']:
+                                if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
+                                        self.get_prices_asset(asset=asset)):
+                                    print(f"Opportunité vente sur {asset} !!!!!")
+                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                    break
+                            else:
+                                if self.get_opportunity_sell(self.get_klines(asset)):
+                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                    break
+                            time.sleep(random.randint(10, 20))
             time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
 
@@ -354,7 +379,7 @@ class BinanceAPI:
         df = self.achat(df)
         df['lowSignal'] = self._percentB_belowzero(df)
         df['highSignal'] = self._percentB_aboveone(df)
-        # print(df)
+        # print(df.tail())
         return df
 
     def _get_opportunity_buy(self, data):

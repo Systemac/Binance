@@ -32,7 +32,7 @@ if __name__ == '__main__':
     while True:
         try:
             test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
-                              recv_windows=config.get("recv_windows"), loop_time=5)
+                              recv_windows=config.get("recv_windows"), percent=1.8, loop_time=5)
             with concurrent.futures.ThreadPoolExecutor(len(test.assets)) as executor:
                 results = executor.map(test.follow, test.assets)
         except:
