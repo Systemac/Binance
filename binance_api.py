@@ -26,8 +26,8 @@ class BinanceAPI:
     def __init__(self, key, secret, recv_windows, percent, loop_time):
         self.key = key
         self.loop_time = loop_time
-        self.percent = 1 + (percent / 100)
-        print(self.percent)
+        self.percent = float(1 + (percent / 100))
+        # print(self.percent)
         # print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
@@ -52,22 +52,28 @@ class BinanceAPI:
                 break
             # print(f"Début suivi sur {asset}")
             i = self.portfolio
-            for j in i:
+            # print(i)
+            # print(asset[:-3])
+            if asset[:-3] in i:
+                print(f"{asset[:-3]} {asset} présent !!!!")
                 # print(f"j : {j}, asset : {asset}")
-                if j == asset[:-3] and self.portfolio[j]['free'] != 0:
+                if self.portfolio[asset[:-3]]['free'] != 0:
+                    # print("ok")
                     for k in self.products['symbols']:
                         # print(f"k : {k}")
                         if k['symbol'] == asset:
-                            # print(
-                            # f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[j]['free']}")
-                            if float(k['filters'][2]['minQty']) < float(i[j]['free']):
-                                print(
-                                    f"Assez de fond sur {j}BTC: {k['filters'][2]['minQty']} {self.portfolio[j]['free']}")
-                                if self.get_my_trades(asset)[0]['price']:
-                                    print(f"derniere valeur de {asset}: {self.get_my_trades(asset)[0]['price']}")
-                                    if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
-                                            self.get_prices_asset(asset=asset)):
-                                        print(f"Opportunité vente sur {asset} !!!!!")
+                            print(
+                                f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[asset[:-3]]['free']}")
+                            if float(k['filters'][2]['minQty']) < float(i[asset[:-3]]['free']):
+                                t = self.get_my_trades(asset)
+                                # print(f"my trades : {t} len: {len(t)}")
+                                if len(t) > 1:
+                                    print(f"derniere valeur de {asset}: {float(t[0]['price']) * self.percent} actuel: {self.get_prices_asset(asset=asset)}")
+                                    aaa = float(t[0]['price']) * self.percent
+                                    bbb = float(self.get_prices_asset(asset=asset))
+                                    print(f" aaa: {aaa}, bbb: {bbb}")
+                                    if aaa <= bbb:
+                                        print(f"Opportunité vente sur {asset}, prix achat: {t[0]['price']}, prix vente : {self.get_prices_asset(asset=asset)}!!!!!")
                                         self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
                                         time.sleep(5)
                                         self.get_portfolio()
@@ -84,14 +90,15 @@ class BinanceAPI:
                                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
                                     time.sleep(random.randint(10, 20))
                                     self.get_portfolio()
-                else:
-                    print(f"Pas assez de fond sur {asset}, suivi en cours pour achat...")
-                    if self.get_opportunity_buy(self.get_klines(asset)):
-                        print(f"Opportunité achat sur {asset} !!!!!")
-                        self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                        time.sleep(random.randint(10, 20))
-                        self.get_portfolio()
+                            time.sleep(random.randint(10, 20))
+            else:
+                print(f"Pas assez de fond sur {asset}, suivi en cours pour achat...")
+                if self.get_opportunity_buy(self.get_klines(asset)):
+                    print(f"Opportunité achat sur {asset} !!!!!")
+                    self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
                     time.sleep(random.randint(10, 20))
+                    self.get_portfolio()
+                time.sleep(random.randint(10, 20))
         time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
 
