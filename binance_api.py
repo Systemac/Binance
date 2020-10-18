@@ -73,13 +73,13 @@ class BinanceAPI:
                                     bbb = float(self.get_prices_asset(asset=asset))
                                     print(f" aaa: {aaa}, bbb: {bbb}")
                                     if aaa <= bbb:
-                                        print(f"Opportunité vente sur {asset}, prix achat: {t[0]['price']}, prix vente : {self.get_prices_asset(asset=asset)}!!!!!")
-                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                        print(f"Opportunité vente sur {asset}, prix achat: {t[0]['price']}, prix vente : {self.get_prices_asset(asset=asset)} !!!!!")
+                                        self.sell_market(market=asset, quantity=self.calcul_quantity_sell(asset))
                                         time.sleep(5)
                                         self.get_portfolio()
                                 else:
                                     if self.get_opportunity_sell(self.get_klines(asset)):
-                                        self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
+                                        self.sell_market(market=asset, quantity=self.calcul_quantity_sell(asset))
                                         time.sleep(5)
                                         self.get_portfolio()
                                 time.sleep(random.randint(10, 20))
