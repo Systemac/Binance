@@ -56,7 +56,7 @@ class BinanceAPI:
                 # print(f"j : {j}, asset : {asset}")
                 if j == asset[:-3] and self.portfolio[j]['free'] != 0:
                     for k in self.products['symbols']:
-                        print(f"k : {k}")
+                        # print(f"k : {k}")
                         if k['symbol'] == asset:
                             print(
                                 f"{asset} min : {float(k['filters'][2]['minQty'])} avail : {self.portfolio[j]['free']}")
@@ -68,6 +68,7 @@ class BinanceAPI:
                                     if datetime.datetime.now() > _now1 + datetime.timedelta(minutes=self.loop_time):
                                         sys.exit(0)
                                     if self.get_my_trades(asset)[0]['price']:
+                                        # print(f"derniere valeur de {asset}: {self.get_my_trades(asset)[0]['price']} {type(self.get_my_trades(asset)[0]['price'])}")
                                         if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
                                                 self.get_prices_asset(asset=asset)):
                                             print(f"Opportunité vente sur {asset} !!!!!")
@@ -79,47 +80,20 @@ class BinanceAPI:
                                             break
                                     time.sleep(random.randint(10, 20))
                             else:
-                                print(f'le else : {asset}')
+                                # print(f'le else : {asset}')
                                 if self.get_opportunity_buy(self.get_klines(asset)):
                                     print(f"Opportunité achat sur {asset} !!!!!")
                                     self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                                    _now = datetime.datetime.now()
-                                    while True:
-                                        if datetime.datetime.now() > _now + datetime.timedelta(minutes=self.loop_time):
-                                            sys.exit(0)
-                                        if self.get_my_trades(asset)[0]['price']:
-                                            if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
-                                                    self.get_prices_asset(asset=asset)):
-                                                print(f"Opportunité vente sur {asset} !!!!!")
-                                                self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                                break
-                                        else:
-                                            if self.get_opportunity_sell(self.get_klines(asset)):
-                                                self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                                break
-                                        time.sleep(random.randint(10, 20))
+                                    time.sleep(random.randint(10, 20))
                             self.get_portfolio()
                 else:
-                    print(f'le else : {asset}')
+                    # print(f'le else : {asset}')
                     if self.get_opportunity_buy(self.get_klines(asset)):
                         print(f"Opportunité achat sur {asset} !!!!!")
                         self.buy_market(market=asset, quantity=self.calcul_quantity(asset))
-                        _now5 = datetime.datetime.now()
-                        while True:
-                            if datetime.datetime.now() > _now5 + datetime.timedelta(minutes=self.loop_time):
-                                sys.exit(0)
-                            if self.get_my_trades(asset)[0]['price']:
-                                if float(self.get_my_trades(asset)[0]['price']) * self.percent > float(
-                                        self.get_prices_asset(asset=asset)):
-                                    print(f"Opportunité vente sur {asset} !!!!!")
-                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                    break
-                            else:
-                                if self.get_opportunity_sell(self.get_klines(asset)):
-                                    self.sell_market(asset, quantity=self.calcul_quantity_sell(asset))
-                                    break
-                            time.sleep(random.randint(10, 20))
-            time.sleep(random.randint(10, 20))
+                        self.get_portfolio()
+                    time.sleep(random.randint(10, 20))
+        time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
 
     def ping(self):
