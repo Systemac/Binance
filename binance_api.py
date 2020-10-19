@@ -27,7 +27,7 @@ class BinanceAPI:
         self.key = key
         self.loop_time = loop_time
         self.percent = float(1 + (percent / 100))
-        # print(self.percent)
+        print(self.percent)
         # print(f"key : {self.key}")
         self.secret = secret
         self.recv_windows = recv_windows
@@ -68,12 +68,15 @@ class BinanceAPI:
                                 t = self.get_my_trades(asset)
                                 # print(f"my trades : {t} len: {len(t)}")
                                 if len(t) > 1:
-                                    print(f"derniere valeur de {asset}: {float(t[0]['price']) * self.percent} actuel: {self.get_prices_asset(asset=asset)}")
-                                    aaa = float(t[0]['price']) * self.percent
+                                    t = self.get_last_buy(asset)
+                                    aaa = float(t) * self.percent
                                     bbb = float(self.get_prices_asset(asset=asset))
-                                    print(f" aaa: {aaa}, bbb: {bbb}")
-                                    if aaa <= bbb:
-                                        print(f"Opportunité vente sur {asset}, prix achat: {t[0]['price']}, prix vente : {self.get_prices_asset(asset=asset)} !!!!!")
+                                    print(
+                                        f"Achat sur {asset}: {self.get_last_buy(asset)} actuel: {self.get_prices_asset(asset=asset)}")
+                                    print(f"asset : {asset} aaa: {float(aaa)}, bbb: {bbb}")
+                                    if float(aaa) <= bbb:
+                                        print(
+                                            f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {self.get_prices_asset(asset=asset)} !!!!!")
                                         self.sell_market(market=asset, quantity=self.calcul_quantity_sell(asset))
                                         time.sleep(5)
                                         self.get_portfolio()
@@ -223,6 +226,11 @@ class BinanceAPI:
         path = "%s/openOrders" % self.BASE_URL_V3
         params = {"symbol": market}
         return self._get(path, params)
+
+    def get_last_buy(self, asset):
+        value = self.get_my_trades(asset, limit=1)
+        for i in value:
+            return float(i['price'])
 
     def get_my_trades(self, market, limit=50):
         path = "%s/myTrades" % self.BASE_URL_V3
