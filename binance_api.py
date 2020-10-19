@@ -55,7 +55,7 @@ class BinanceAPI:
             # print(i)
             # print(asset[:-3])
             if asset[:-3] in i:
-                print(f"{asset[:-3]} {asset} présent !!!!")
+                # print(f"{asset[:-3]} {asset} présent !!!!")
                 # print(f"j : {j}, asset : {asset}")
                 if self.portfolio[asset[:-3]]['free'] != 0:
                     # print("ok")
@@ -72,8 +72,8 @@ class BinanceAPI:
                                     aaa = float(t) * self.percent
                                     bbb = float(self.get_prices_asset(asset=asset))
                                     print(
-                                        f"Achat sur {asset}: {self.get_last_buy(asset)} actuel: {self.get_prices_asset(asset=asset)}")
-                                    print(f"asset : {asset} aaa: {float(aaa)}, bbb: {bbb}")
+                                        f"Valeur d'achat sur {asset}: {self.get_last_buy(asset)} actuel: {self.get_prices_asset(asset=asset)}")
+                                    # print(f"asset : {asset} aaa: {float(aaa)}, bbb: {bbb}")
                                     if float(aaa) <= bbb:
                                         print(
                                             f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {self.get_prices_asset(asset=asset)} !!!!!")
