@@ -7,28 +7,6 @@ from config.config import config
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
-    #                   recv_windows=config.get("recv_windows"))
-    # print((test.get_prices_asset("ETHBTC")))
-    # print((type(test.get_prices_asset("ETHBTC"))))
-    # print(test.get_my_trades("LINKBTC")[-1])
-    # test.calcul_quantity_sell("LINKBTC")
-    # test.follow("LINKBTC")
-    # while True:
-    # test.calcul_precision_("LINKBTC")
-    #     for i in test.assets:
-    #         print(i)
-    #         if test.get_opportunity(test.get_klines(i)):
-    #             print(f"Opportunité !!!!!!!!!!")
-    #             break
-    #         else:
-    #             print("Pas encore...")
-    #     time.sleep(3)
-    # for _ in test.assets:
-    #     _ = WSClient(_)
-    #     _.start()
-    #     print(_.getName())
-
     while True:
         try:
             test = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
