@@ -386,7 +386,8 @@ class BinanceAPI:
         # print(achat)
         return self._get_opportunity_sell(data)
 
-    def visu_data(self, dfi):
+    def visu_data(self, market):
+        dfi = self.get_klines(market)
         df = self._prepa_visu_or_opportunity(dfi)
         for _ in df:
             df['RSI30'] = 30
@@ -401,7 +402,7 @@ class BinanceAPI:
                mpf.make_addplot(rsi, panel=2, color='g'),
                mpf.make_addplot(df["macd"], color='black', panel=3),
                mpf.make_addplot(df["Signal"], color='r', panel=3)]
-        mpf.plot(df, type='candle', figscale=1.25, volume=True, addplot=apt)
+        mpf.plot(df, title=market, type='candle', figscale=1.25, volume=True, addplot=apt)
 
     def _percentB_belowzero(self, df):
         percentB = df['percentB']
@@ -439,7 +440,7 @@ class BinanceAPI:
         df['percentB'] = (df['Close'] - df['LowB']) / (df['HighB'] - df['LowB'])
         return df
 
-    def get_rsi_timeseries(self, prices, n=14):
+    def get_rsi_timeseries(self, prices, n=16):
         df_ = prices['Close']
         # RSI = 100 - (100 / (1 + RS))
         # where RS = (Wilder-smoothed n-period average of gains / Wilder-smoothed n-period average of -losses)
