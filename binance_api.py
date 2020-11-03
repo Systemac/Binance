@@ -119,7 +119,7 @@ class BinanceAPI:
         params = {"symbol": market, "limit": limit}
         return self._get_no_sign(path, params)
 
-    def get_klines(self, market, interval="1m", delta=200000, offset=0):
+    def get_klines(self, market, interval="5m", delta=2000000, offset=0):
         delta = delta * 1000
         offset = offset * 1000
         times = self.get_server_time()['serverTime']
