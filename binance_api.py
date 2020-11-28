@@ -245,7 +245,7 @@ class BinanceAPI:
         return self._get(path, params)
 
     def calcul_quantity(self, asset):
-        btc_free = self.portfolio['BTC']['free'] / 4
+        btc_free = self.portfolio['BTC']['free'] / 2
         print(btc_free)
         quantity = 0.
         essai = self.get_prices()
