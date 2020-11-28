@@ -70,6 +70,7 @@ class BinanceAPI:
                                 if len(t) > 1:
                                     t = self.get_last_buy(asset)
                                     aaa = float(t) * self.percent
+                                    ccc = float(t) * 0.95
                                     bbb = float(self.get_prices_asset(asset=asset))
                                     print(
                                         f"Valeur d'achat sur {asset}: {self.get_last_buy(asset)} actuel: {self.get_prices_asset(asset=asset)}")
@@ -77,6 +78,12 @@ class BinanceAPI:
                                     if float(aaa) <= bbb:
                                         print(
                                             f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {self.get_prices_asset(asset=asset)} !!!!!")
+                                        self.sell_market(market=asset, quantity=self.calcul_quantity_sell(asset))
+                                        time.sleep(5)
+                                        self.get_portfolio()
+                                    if float(ccc) >= bbb:
+                                        print(
+                                            f"Vente de {asset}, prix achat: {t}, prix vente : {self.get_prices_asset(asset=asset)}, trop forte baisse.")
                                         self.sell_market(market=asset, quantity=self.calcul_quantity_sell(asset))
                                         time.sleep(5)
                                         self.get_portfolio()
