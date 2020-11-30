@@ -70,7 +70,7 @@ class BinanceAPI:
                                 if len(t) > 1:
                                     t = self.get_last_buy(asset)
                                     aaa = float(t) * self.percent
-                                    ccc = float(t) * 0.95
+                                    ccc = float(t) * 0.90
                                     bbb = float(self.get_prices_asset(asset=asset))
                                     print(
                                         f"Valeur d'achat sur {asset}: {self.get_last_buy(asset)} actuel: {self.get_prices_asset(asset=asset)}")
