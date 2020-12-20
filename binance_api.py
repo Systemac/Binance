@@ -45,7 +45,7 @@ class BinanceAPI:
         stepper = 10.0 ** digits
         return math.trunc(stepper * number) / stepper
 
-    def follow(self, asset):
+    """def follow(self, asset):
         _nowt = datetime.datetime.now()
         while True:
             if datetime.datetime.now() > _nowt + datetime.timedelta(minutes=self.loop_time):
@@ -111,7 +111,7 @@ class BinanceAPI:
                 time.sleep(random.randint(10, 20))
         time.sleep(random.randint(10, 20))
         print(f"Fin de boucle sur {asset}")
-
+"""
     def ping(self):
         path = "%s/ping" % self.BASE_URL_V3
         return requests.get(path, timeout=30, verify=True).json()
@@ -155,12 +155,15 @@ class BinanceAPI:
             print("Erreur...")
             sys.exit(0)
         else:
-            dico = {}
-            for _ in data['balances']:
-                if float(_['free']) != 0:
-                    dico[_['asset']] = {
-                        'free': float(_['free']),
-                        'locked': float(_['locked'])}
+            dico = {
+                _['asset']: {
+                    'free': float(_['free']),
+                    'locked': float(_['locked']),
+                }
+                for _ in data['balances']
+                if float(_['free']) != 0
+            }
+
             self.portfolio = dico
 
     def get_assets_to_follow(self):
