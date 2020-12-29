@@ -47,7 +47,6 @@ def follow(asset):
                                     senders(
                                         f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)} !!!!!")
                                     time.sleep(2)
-                                    ba.get_portfolio()
                                 if float(ccc) >= bbb:
                                     print(
                                         f"Vente de {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)}, trop forte baisse.")
@@ -55,23 +54,23 @@ def follow(asset):
                                     senders(
                                         f"Vente de {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)}, trop forte baisse.")
                                     time.sleep(2)
-                                    ba.get_portfolio()
                             else:
                                 if ba.get_opportunity_sell(ba.get_klines(asset)):
                                     ba.sell_market(market=asset, quantity=ba.calcul_quantity_sell(asset))
                                     time.sleep(2)
-                                    ba.get_portfolio()
                             time.sleep(random.randint(6, 12))
                         else:
                             # print(f'le else : {asset}')
                             if ba.get_opportunity_buy(ba.get_klines(asset)):
                                 opportunity_buy(asset)
+                        ba.get_portfolio()
                         time.sleep(random.randint(10, 20))
         else:
             print(f"Pas assez de fond sur {asset}, suivi en cours pour achat...")
             if ba.get_opportunity_buy(ba.get_klines(asset)):
                 opportunity_buy(asset)
             time.sleep(random.randint(6, 12))
+    ba.get_portfolio()
     time.sleep(random.randint(10, 20))
     print(f"Fin de boucle sur {asset}")
 

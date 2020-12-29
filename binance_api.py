@@ -2,7 +2,6 @@ import datetime
 import hashlib
 import hmac
 import math
-import random
 import sys
 import time
 
@@ -188,6 +187,8 @@ class BinanceAPI:
                 if l[k][0] not in self.assets:
                     self.assets.append(l[k][0])
                 k += 1
+        if 'XRPBTC' in self.assets:
+            self.assets.remove('XRPBTC')
         print(self.assets)
 
     def get_sorted_symbol_by_volume(self):
