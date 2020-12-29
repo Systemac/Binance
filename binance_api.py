@@ -182,8 +182,8 @@ class BinanceAPI:
                             print("KO")
         l = self.get_sorted_symbol_by_volume()
         k = 0
-        if len(self.assets) < 6:
-            while len(self.assets) < 6:
+        if len(self.assets) < 3:
+            while len(self.assets) < 3:
                 if l[k][0] not in self.assets:
                     self.assets.append(l[k][0])
                 k += 1
