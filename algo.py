@@ -1,11 +1,14 @@
+import datetime
 import random
 import time
-import datetime
-from config.config import config
-from binance_api import BinanceAPI
 
-ba = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"), 
+from binance_api import BinanceAPI
+from config.config import config
+from telegram import senders
+
+ba = BinanceAPI(key=config.get("KEY"), secret=config.get("SECRET"),
                 recv_windows=config.get("recv_windows"), percent=config.get('percent'), loop_time=5)
+
 
 def follow(asset):
     _nowt = datetime.datetime.now()
@@ -41,35 +44,41 @@ def follow(asset):
                                     print(
                                         f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)} !!!!!")
                                     ba.sell_market(market=asset, quantity=ba.calcul_quantity_sell(asset))
-                                    time.sleep(5)
+                                    senders(
+                                        f"Opportunité vente sur {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)} !!!!!")
+                                    time.sleep(2)
                                     ba.get_portfolio()
                                 if float(ccc) >= bbb:
                                     print(
                                         f"Vente de {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)}, trop forte baisse.")
                                     ba.sell_market(market=asset, quantity=ba.calcul_quantity_sell(asset))
-                                    time.sleep(5)
+                                    senders(
+                                        f"Vente de {asset}, prix achat: {t}, prix vente : {ba.get_prices_asset(asset=asset)}, trop forte baisse.")
+                                    time.sleep(2)
                                     ba.get_portfolio()
                             else:
                                 if ba.get_opportunity_sell(ba.get_klines(asset)):
                                     ba.sell_market(market=asset, quantity=ba.calcul_quantity_sell(asset))
-                                    time.sleep(5)
+                                    time.sleep(2)
                                     ba.get_portfolio()
-                            time.sleep(random.randint(10, 20))
+                            time.sleep(random.randint(6, 12))
                         else:
                             # print(f'le else : {asset}')
                             if ba.get_opportunity_buy(ba.get_klines(asset)):
-                                print(f"Opportunité achat sur {asset} !!!!!")
-                                ba.buy_market(market=asset, quantity=ba.calcul_quantity(asset))
-                                time.sleep(random.randint(10, 20))
-                                ba.get_portfolio()
+                                opportunity_buy(asset)
                         time.sleep(random.randint(10, 20))
         else:
             print(f"Pas assez de fond sur {asset}, suivi en cours pour achat...")
             if ba.get_opportunity_buy(ba.get_klines(asset)):
-                print(f"Opportunité achat sur {asset} !!!!!")
-                ba.buy_market(market=asset, quantity=ba.calcul_quantity(asset))
-                time.sleep(random.randint(10, 20))
-                ba.get_portfolio()
-            time.sleep(random.randint(10, 20))
+                opportunity_buy(asset)
+            time.sleep(random.randint(6, 12))
     time.sleep(random.randint(10, 20))
     print(f"Fin de boucle sur {asset}")
+
+
+def opportunity_buy(asset):
+    print(f"Opportunité achat sur {asset} !!!!!")
+    ba.buy_market(market=asset, quantity=ba.calcul_quantity(asset))
+    senders(f"Opportunité achat sur {asset} !!!!!")
+    time.sleep(random.randint(6, 12))
+    ba.get_portfolio()
