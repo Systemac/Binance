@@ -13,4 +13,4 @@ For docker: it's here :
 
 https://hub.docker.com/repository/docker/systemac/trader/general
 
-You just need to create a volume with config.py same as example.
+You just need to create a volume with config.py same as example and drop it in a config folder.
